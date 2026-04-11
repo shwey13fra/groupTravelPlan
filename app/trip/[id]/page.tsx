@@ -44,8 +44,25 @@ export default async function TripPage({
 
   if (!trip) notFound();
 
-  // Identify current member from cookie
-  const currentMemberId = cookieStore.get(`tmid_${trip.id}`)?.value ?? null;
+  // Identify current member — auth takes priority (works across devices),
+  // cookie is the fallback for non-auth joiners
+  const { data: { user } } = await supabase.auth.getUser();
+
+  let currentMemberId: string | null = null;
+
+  if (user) {
+    const { data: authMember } = await supabase
+      .from("trip_members")
+      .select("id")
+      .eq("trip_id", trip.id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    currentMemberId = authMember?.id ?? null;
+  }
+
+  if (!currentMemberId) {
+    currentMemberId = cookieStore.get(`tmid_${trip.id}`)?.value ?? null;
+  }
 
   // Remaining fetches in parallel
   const [membersRes, suggestionsRes, votesRes] = await Promise.all([

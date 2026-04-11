@@ -6,12 +6,18 @@ import { FlightAnimation } from "@/components/trip/FlightAnimation";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function Home() {
-  const cookieStore = await cookies();
-  const lastTripId  = cookieStore.get("last_trip_id")?.value ?? null;
+  const supabase = await createClient();
+
+  const [{ data: { user } }, cookieStore] = await Promise.all([
+    supabase.auth.getUser(),
+    cookies(),
+  ]);
+
+  // Last trip cookie fallback (for non-auth joiners)
+  const lastTripId = !user ? (cookieStore.get("last_trip_id")?.value ?? null) : null;
 
   let lastTripName: string | null = null;
   if (lastTripId) {
-    const supabase = await createClient();
     const { data } = await supabase
       .from("trips")
       .select("name")
@@ -36,7 +42,22 @@ export default async function Home() {
         </p>
 
         <div className="flex flex-col gap-3 w-full mt-2">
-          {lastTripId && lastTripName && (
+          {/* Authenticated organizer */}
+          {user && (
+            <Button
+              asChild
+              size="lg"
+              className="w-full min-h-[44px] bg-white/10 hover:bg-white/20 text-white border border-white/20 gap-2 transition-all duration-200"
+            >
+              <Link href="/my-trips">
+                My trips
+                <ArrowRight className="h-4 w-4 ml-auto" />
+              </Link>
+            </Button>
+          )}
+
+          {/* Non-auth joiner with last trip cookie */}
+          {!user && lastTripId && lastTripName && (
             <Button
               asChild
               size="lg"
@@ -44,11 +65,12 @@ export default async function Home() {
             >
               <Link href={`/trip/${lastTripId}`}>
                 Continue planning
-                <span className="font-display text-lg leading-none">{lastTripName}</span>
+                <span className="font-display text-lg leading-none mx-1">{lastTripName}</span>
                 <ArrowRight className="h-4 w-4 ml-auto" />
               </Link>
             </Button>
           )}
+
           <Button
             asChild
             size="lg"

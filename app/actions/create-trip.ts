@@ -103,6 +103,16 @@ export async function createTrip(
     return { error: "Failed to create trip. Please try again." };
   }
 
+  // Stamp the organizer's auth user_id onto their member row (enables
+  // device-independent identity on the dashboard)
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    await supabase
+      .from("trip_members")
+      .update({ user_id: user.id })
+      .eq("id", member.id);
+  }
+
   // Identify this browser as the organizer for this trip
   const cookieStore = await cookies();
   cookieStore.set(`tmid_${trip.id}`, member.id, {
