@@ -1,14 +1,23 @@
 import { notFound } from "next/navigation";
+import { ChevronRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import ShareButton from "@/components/trip/ShareButton";
 
 const SECTION_CARDS = [
-  { title: "Destinations", emoji: "📍" },
-  { title: "Itinerary",    emoji: "🗓️" },
-  { title: "Tasks",        emoji: "✅" },
-  { title: "Vault",        emoji: "📁" },
-  { title: "Expenses",     emoji: "💸" },
+  { title: "Destinations", emoji: "📍", sub: "Vote on where you're headed" },
+  { title: "Itinerary",    emoji: "🗓️", sub: "Day-by-day plan" },
+  { title: "Tasks",        emoji: "✅", sub: "Who's doing what" },
+  { title: "Vault",        emoji: "📁", sub: "Docs, links, and notes" },
+  { title: "Expenses",     emoji: "💸", sub: "Split costs, settle up" },
 ];
+
+const VIBE_LABELS: Record<string, string> = {
+  beach: "Beach",
+  mountains: "Mountains",
+  city: "City",
+  heritage: "Heritage",
+  adventure: "Adventure",
+};
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-US", {
@@ -41,57 +50,73 @@ export default async function TripPage({
 
   const memberList = members ?? [];
 
+  const metaLine = [
+    trip.vibe ? VIBE_LABELS[trip.vibe] : null,
+    trip.month ?? null,
+    trip.duration_days ? `${trip.duration_days} days` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
   const dateLabel =
     trip.start_date && trip.end_date
       ? `${formatDate(trip.start_date)} – ${formatDate(trip.end_date)}`
-      : trip.month
-      ? `Planned for ${trip.month}`
       : null;
 
   return (
-    <main className="min-h-screen bg-background">
-      <div className="mx-auto max-w-2xl px-4 py-10 space-y-6">
+    <main className="min-h-screen bg-[#FAF8F5]">
 
-        {/* Hero */}
-        <section className="space-y-1">
-          <h1 className="font-display text-5xl sm:text-6xl text-foreground leading-tight">
+      {/* ── Dark hero ─────────────────────────────────────────────────────── */}
+      <div className="bg-gradient-to-b from-[#1C2B4A] to-[#243558] px-6 pt-14 pb-10">
+        <div className="mx-auto w-full max-w-2xl space-y-3">
+          {metaLine && (
+            <p className="text-white/40 text-xs uppercase tracking-[0.2em] font-medium">
+              {metaLine}
+            </p>
+          )}
+          <h1 className="font-display text-6xl sm:text-7xl text-[#FAF8F5] leading-tight">
             {trip.name}
           </h1>
           {trip.destination && (
-            <p className="text-muted-foreground text-lg">{trip.destination}</p>
+            <p className="text-white/60 text-base">{trip.destination}</p>
           )}
           {dateLabel && (
-            <p className="text-sm text-muted-foreground">{dateLabel}</p>
+            <p className="text-white/50 text-sm">{dateLabel}</p>
           )}
-        </section>
+          <div className="pt-3">
+            <ShareButton
+              joinCode={trip.join_code}
+              className="border-white/25 text-white bg-white/5 hover:bg-white/15 hover:border-white/40 w-full sm:w-auto"
+            />
+          </div>
+        </div>
+      </div>
 
-        {/* AI nudge banner */}
-        <section className="rounded-xl bg-amber-50 border border-amber-100 px-5 py-4">
-          <p className="text-sm text-amber-800 leading-relaxed">
-            {trip.ai_nudge ?? "Welcome! Share the link below to invite your group."}
-          </p>
-        </section>
+      {/* ── Content ───────────────────────────────────────────────────────── */}
+      <div className="mx-auto max-w-2xl px-6 py-8 space-y-8">
 
-        {/* Share */}
-        <ShareButton joinCode={trip.join_code} />
+        {/* AI nudge */}
+        <p className="border-l-[3px] border-amber-400 pl-4 text-sm text-foreground/65 leading-relaxed italic">
+          {trip.ai_nudge ?? "Welcome! Share the invite link above to get everyone in."}
+        </p>
 
         {/* Members */}
-        <section className="space-y-2">
-          <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
+        <section className="space-y-3">
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
             Members · {memberList.length}
           </h2>
           <div className="flex gap-2 overflow-x-auto pb-1">
             {memberList.map((m) => (
               <div
                 key={m.id}
-                className="flex-shrink-0 flex items-center gap-1.5 rounded-full bg-secondary px-3 py-2 text-sm"
+                className="flex-shrink-0 flex items-center gap-2 rounded-full border border-[#E8E4DE] bg-white px-3 py-2 shadow-sm"
               >
                 <span className="text-base leading-none">{m.emoji}</span>
-                <span className="font-medium text-foreground whitespace-nowrap">
+                <span className="text-sm font-medium text-foreground whitespace-nowrap">
                   {m.name}
                 </span>
                 {m.is_organizer && (
-                  <span className="text-[10px] bg-primary text-primary-foreground rounded-full px-1.5 py-0.5 font-bold uppercase tracking-wide">
+                  <span className="text-[9px] bg-[#1C2B4A] text-white rounded-full px-1.5 py-0.5 font-bold uppercase tracking-wider">
                     Org
                   </span>
                 )}
@@ -100,22 +125,28 @@ export default async function TripPage({
           </div>
         </section>
 
-        {/* Placeholder section cards */}
-        <section className="space-y-3">
-          {SECTION_CARDS.map((card) => (
-            <div
-              key={card.title}
-              className="rounded-xl border border-border bg-card px-5 py-4 flex items-center gap-4"
-            >
-              <span className="text-2xl">{card.emoji}</span>
-              <div>
-                <p className="font-semibold text-foreground">{card.title}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Coming up in the next phase.
-                </p>
+        {/* Section rows */}
+        <section>
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground mb-1">
+            Trip sections
+          </h2>
+          <div className="divide-y divide-[#E8E4DE]">
+            {SECTION_CARDS.map((card) => (
+              <div
+                key={card.title}
+                className="flex items-center justify-between py-4"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-xl w-8 text-center">{card.emoji}</span>
+                  <div>
+                    <p className="font-medium text-foreground text-sm">{card.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{card.sub}</p>
+                  </div>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground/30 shrink-0" />
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </section>
 
       </div>

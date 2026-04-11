@@ -16,10 +16,10 @@ export default async function JoinPage({
 
   if (!trip) {
     return (
-      <main className="min-h-screen bg-background flex items-center justify-center px-4">
+      <main className="min-h-screen bg-[#FAF8F5] flex items-center justify-center px-4">
         <div className="text-center space-y-2">
           <p className="text-3xl">🔍</p>
-          <h1 className="text-xl font-semibold text-foreground">
+          <h1 className="font-display text-4xl text-foreground">
             Trip not found.
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -38,19 +38,26 @@ export default async function JoinPage({
   const memberCount = count ?? 0;
 
   return (
-    <main className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="w-full max-w-sm space-y-6">
-        <div className="text-center space-y-1">
-          <p className="text-4xl">✈️</p>
-          <h1 className="font-display text-4xl text-foreground leading-tight">
-            {trip.name}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {memberCount} {memberCount === 1 ? "person" : "people"} already in
-          </p>
-        </div>
+    <main className="min-h-screen bg-[#FAF8F5]">
+
+      {/* Dark hero */}
+      <div className="bg-gradient-to-b from-[#1C2B4A] to-[#243558] px-6 pt-14 pb-10 text-center">
+        <p className="text-white/40 text-xs uppercase tracking-[0.2em] font-medium mb-3">
+          You&apos;re invited
+        </p>
+        <h1 className="font-display text-5xl sm:text-6xl text-[#FAF8F5] leading-tight">
+          {trip.name}
+        </h1>
+        <p className="text-white/45 text-sm mt-2">
+          {memberCount} {memberCount === 1 ? "person" : "people"} already in
+        </p>
+      </div>
+
+      {/* Form */}
+      <div className="mx-auto max-w-sm px-6 py-8">
         <JoinForm tripId={trip.id} />
       </div>
+
     </main>
   );
 }

@@ -142,13 +142,22 @@ export default function CreatePage() {
   const { heading, sub } = STEP_TITLES[step];
 
   return (
-    <main className="min-h-screen bg-background flex items-start justify-center px-4 py-10">
+    <main className="min-h-screen bg-[#FAF8F5]">
+
+      {/* Branded header */}
+      <div className="bg-[#1C2B4A] px-6 py-4">
+        <a href="/" className="font-display text-2xl text-[#FAF8F5]/80 hover:text-[#FAF8F5] transition-colors">
+          TripSync
+        </a>
+      </div>
+
+      <div className="flex items-start justify-center px-4 py-10">
       <div className="w-full max-w-sm">
 
         {/* Progress */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-muted-foreground">
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Step {step} of 3
             </span>
             {step > 1 && (
@@ -167,8 +176,8 @@ export default function CreatePage() {
               <div
                 key={s}
                 className={cn(
-                  "h-1 flex-1 rounded-full transition-all duration-300",
-                  s <= step ? "bg-foreground" : "bg-border"
+                  "h-0.5 flex-1 rounded-full transition-all duration-300",
+                  s <= step ? "bg-[#1C2B4A]" : "bg-border"
                 )}
               />
             ))}
@@ -177,7 +186,7 @@ export default function CreatePage() {
 
         {/* Heading */}
         <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-foreground">{heading}</h1>
+          <h1 className="font-display text-4xl text-foreground leading-tight">{heading}</h1>
           <p className="text-sm text-muted-foreground mt-1">{sub}</p>
         </div>
 
@@ -474,6 +483,7 @@ export default function CreatePage() {
           )}
 
         </form>
+      </div>
       </div>
     </main>
   );
