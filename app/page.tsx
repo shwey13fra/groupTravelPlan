@@ -1,8 +1,25 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FlightAnimation } from "@/components/trip/FlightAnimation";
+import { createClient } from "@/lib/supabase/server";
 
-export default function Home() {
+export default async function Home() {
+  const cookieStore = await cookies();
+  const lastTripId  = cookieStore.get("last_trip_id")?.value ?? null;
+
+  let lastTripName: string | null = null;
+  if (lastTripId) {
+    const supabase = await createClient();
+    const { data } = await supabase
+      .from("trips")
+      .select("name")
+      .eq("id", lastTripId)
+      .maybeSingle();
+    lastTripName = data?.name ?? null;
+  }
+
   return (
     <main className="relative min-h-screen bg-[#1C2B4A] flex flex-col items-center justify-center px-6 overflow-hidden">
       <FlightAnimation />
@@ -17,13 +34,29 @@ export default function Home() {
         <p className="text-white/50 text-base leading-relaxed">
           Plan trips together, without the chaos
         </p>
-        <Button
-          asChild
-          size="lg"
-          className="mt-2 w-full sm:w-auto min-h-[44px] bg-amber-500 hover:bg-amber-400 text-white border-0 shadow-lg shadow-amber-900/30 transition-all duration-200 hover:scale-105 active:scale-95"
-        >
-          <Link href="/create">Create a trip</Link>
-        </Button>
+
+        <div className="flex flex-col gap-3 w-full mt-2">
+          {lastTripId && lastTripName && (
+            <Button
+              asChild
+              size="lg"
+              className="w-full min-h-[44px] bg-white/10 hover:bg-white/20 text-white border border-white/20 gap-2 transition-all duration-200"
+            >
+              <Link href={`/trip/${lastTripId}`}>
+                Continue planning
+                <span className="font-display text-lg leading-none">{lastTripName}</span>
+                <ArrowRight className="h-4 w-4 ml-auto" />
+              </Link>
+            </Button>
+          )}
+          <Button
+            asChild
+            size="lg"
+            className="w-full min-h-[44px] bg-amber-500 hover:bg-amber-400 text-white border-0 shadow-lg shadow-amber-900/30 transition-all duration-200 hover:scale-105 active:scale-95"
+          >
+            <Link href="/create">Create a trip</Link>
+          </Button>
+        </div>
       </div>
     </main>
   );

@@ -7,8 +7,8 @@ import { createClient } from "@/lib/supabase/server";
 
 const joinTripSchema = z.object({
   tripId: z.string().uuid(),
-  name: z.string().min(1, "Name is required").max(30, "Max 30 characters"),
-  emoji: z.string().min(1, "Pick an emoji"),
+  name:   z.string().min(1, "Name is required").max(30, "Max 30 characters"),
+  emoji:  z.string().min(1, "Pick an emoji"),
 });
 
 export async function joinTrip(
@@ -29,31 +29,55 @@ export async function joinTrip(
     .eq("id", tripId)
     .maybeSingle();
 
-  if (!trip) {
-    return { error: "Trip not found." };
-  }
+  if (!trip) return { error: "Trip not found." };
 
-  const { data: member, error } = await supabase
-    .from("trip_members")
-    .insert({
-      trip_id: tripId,
-      name,
-      emoji,
-      is_organizer: false,
-      commitment_status: "pending",
-    })
-    .select("id")
-    .single();
-
-  if (error || !member) {
-    return { error: "Failed to join trip. Please try again." };
-  }
-
-  // Identify this browser as this member for this trip
   const cookieStore = await cookies();
-  cookieStore.set(`tmid_${tripId}`, member.id, {
+
+  // Check if a member with this name already exists in the trip (reclaim flow).
+  // This lets an existing member re-establish their cookie identity without
+  // creating a duplicate row.
+  const { data: existing } = await supabase
+    .from("trip_members")
+    .select("id")
+    .eq("trip_id", tripId)
+    .ilike("name", name.trim())
+    .maybeSingle();
+
+  let memberId: string;
+
+  if (existing) {
+    // Reclaim: set cookie to existing member, no new row
+    memberId = existing.id;
+  } else {
+    // New member
+    const { data: member, error } = await supabase
+      .from("trip_members")
+      .insert({
+        trip_id:           tripId,
+        name,
+        emoji,
+        is_organizer:      false,
+        commitment_status: "pending",
+      })
+      .select("id")
+      .single();
+
+    if (error || !member) return { error: "Failed to join trip. Please try again." };
+    memberId = member.id;
+  }
+
+  // Set member identity cookie (scoped to this trip)
+  cookieStore.set(`tmid_${tripId}`, memberId, {
     path:     "/",
-    maxAge:   60 * 60 * 24 * 30, // 30 days
+    maxAge:   60 * 60 * 24 * 30,
+    sameSite: "lax",
+    httpOnly: true,
+  });
+
+  // Store last visited trip for the landing page "Continue" button
+  cookieStore.set("last_trip_id", tripId, {
+    path:     "/",
+    maxAge:   60 * 60 * 24 * 30,
     sameSite: "lax",
     httpOnly: true,
   });

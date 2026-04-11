@@ -107,7 +107,15 @@ export async function createTrip(
   const cookieStore = await cookies();
   cookieStore.set(`tmid_${trip.id}`, member.id, {
     path:     "/",
-    maxAge:   60 * 60 * 24 * 30, // 30 days
+    maxAge:   60 * 60 * 24 * 30,
+    sameSite: "lax",
+    httpOnly: true,
+  });
+
+  // Store last visited trip for the landing page "Continue" button
+  cookieStore.set("last_trip_id", trip.id, {
+    path:     "/",
+    maxAge:   60 * 60 * 24 * 30,
     sameSite: "lax",
     httpOnly: true,
   });

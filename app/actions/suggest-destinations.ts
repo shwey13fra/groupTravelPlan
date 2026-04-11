@@ -54,8 +54,9 @@ export async function suggestDestinations(
       messages: [{ role: "user", content: userPrompt }],
     });
     rawText = msg.content[0].type === "text" ? msg.content[0].text.trim() : "";
-  } catch {
-    return { error: "AI service unavailable. Please try again." };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return { error: `AI error: ${msg}` };
   }
 
   // Parse & validate
