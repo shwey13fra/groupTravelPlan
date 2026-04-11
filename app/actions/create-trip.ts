@@ -15,15 +15,16 @@ function generateJoinCode(): string {
 
 const createTripSchema = z
   .object({
-    tripName: z.string().min(2).max(50),
+    tripName:      z.string().min(2).max(50),
     organizerName: z.string().min(1).max(30),
     organizerEmoji: z.string().min(1),
-    groupSize: z.coerce.number().int().min(2).max(20),
-    budgetMin: z.coerce.number().int().min(1),
-    budgetMax: z.coerce.number().int().min(1),
-    durationDays: z.coerce.number().int().min(1).max(30),
-    vibe: z.enum(["beach", "mountains", "city", "heritage", "adventure"]),
-    month: z.enum([
+    groupSize:     z.coerce.number().int().min(2).max(20),
+    currency:      z.string().min(1),
+    budgetMin:     z.coerce.number().int().min(1),
+    budgetMax:     z.coerce.number().int().min(1),
+    durationDays:  z.coerce.number().int().min(1).max(30),
+    vibe:      z.enum(["beach", "mountains", "city", "heritage", "adventure"]),
+    month:     z.enum([
       "January", "February", "March", "April", "May", "June",
       "July", "August", "September", "October", "November", "December",
     ]),
@@ -48,7 +49,7 @@ export async function createTrip(
   const data: CreateTripInput = parsed.data;
   const supabase = await createClient();
 
-  // Generate a unique join code (collision is astronomically unlikely but handle it)
+  // Generate a unique join code
   let joinCode = generateJoinCode();
   for (let attempt = 0; attempt < 5; attempt++) {
     const { data: existing } = await supabase
@@ -68,6 +69,7 @@ export async function createTrip(
       vibe: data.vibe,
       month: data.month,
       group_type: data.groupType,
+      currency: data.currency,
       budget_min: data.budgetMin,
       budget_max: data.budgetMax,
       duration_days: data.durationDays,
@@ -92,7 +94,6 @@ export async function createTrip(
   });
 
   if (memberError) {
-    // Clean up the orphaned trip
     await supabase.from("trips").delete().eq("id", trip.id);
     return { error: "Failed to create trip. Please try again." };
   }

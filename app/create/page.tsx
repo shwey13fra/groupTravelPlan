@@ -42,6 +42,19 @@ const GROUP_TYPES = [
   { value: "mixed",   label: "Mixed 🤝" },
 ] as const;
 
+const CURRENCIES = [
+  { code: "USD", symbol: "$",  label: "USD" },
+  { code: "EUR", symbol: "€",  label: "EUR" },
+  { code: "GBP", symbol: "£",  label: "GBP" },
+  { code: "INR", symbol: "₹",  label: "INR" },
+  { code: "AED", symbol: "د.إ", label: "AED" },
+  { code: "SGD", symbol: "S$", label: "SGD" },
+  { code: "AUD", symbol: "A$", label: "AUD" },
+  { code: "JPY", symbol: "¥",  label: "JPY" },
+] as const;
+
+type CurrencyCode = (typeof CURRENCIES)[number]["code"];
+
 // ── Schema (Zod v4) ───────────────────────────────────────────────────────
 
 const formSchema = z
@@ -51,6 +64,7 @@ const formSchema = z
     organizerEmoji: z.string().min(1, "Pick an emoji for yourself"),
     // valueAsNumber=true in register means these arrive as number (NaN when empty)
     groupSize:      z.number().int().min(2, "Min 2 people").max(20, "Max 20 people"),
+    currency:       z.string().min(1, "Pick a currency"),
     budgetMin:      z.number().int().min(1, "Enter a minimum budget"),
     budgetMax:      z.number().int().min(1, "Enter a maximum budget"),
     durationDays:   z.number().int().min(1, "At least 1 day").max(30, "Max 30 days"),
@@ -67,7 +81,7 @@ type FormData = z.infer<typeof formSchema>;
 
 const STEP_FIELDS: Record<1 | 2 | 3, (keyof FormData)[]> = {
   1: ["tripName", "organizerName", "organizerEmoji"],
-  2: ["groupSize", "budgetMin", "budgetMax", "durationDays"],
+  2: ["groupSize", "currency", "budgetMin", "budgetMax", "durationDays"],
   3: ["vibe", "month", "groupType"],
 };
 
@@ -95,6 +109,7 @@ export default function CreatePage() {
     defaultValues: {
       tripName: "",
       organizerName: "",
+      currency: "USD",
     },
     mode: "onBlur",
   });
@@ -250,23 +265,70 @@ export default function CreatePage() {
                 )}
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-3">
                 <Label>Budget per person</Label>
-                <div className="flex gap-2 items-center">
-                  <Input
-                    type="number"
-                    placeholder="Min"
-                    min={1}
-                    {...register("budgetMin", { valueAsNumber: true })}
-                  />
-                  <span className="text-muted-foreground text-sm shrink-0">—</span>
-                  <Input
-                    type="number"
-                    placeholder="Max"
-                    min={1}
-                    {...register("budgetMax", { valueAsNumber: true })}
-                  />
-                </div>
+
+                {/* Currency selector */}
+                <Controller
+                  name="currency"
+                  control={control}
+                  render={({ field }) => {
+                    const selected = CURRENCIES.find((c) => c.code === field.value);
+                    return (
+                      <div className="space-y-2">
+                        <div className="flex flex-wrap gap-1.5">
+                          {CURRENCIES.map(({ code, label }) => (
+                            <button
+                              key={code}
+                              type="button"
+                              onClick={() => field.onChange(code)}
+                              className={cn(
+                                "px-3 py-1.5 text-xs rounded-lg border font-medium transition-all",
+                                field.value === code
+                                  ? "border-foreground bg-foreground text-background"
+                                  : "border-border hover:border-foreground/40 text-foreground"
+                              )}
+                            >
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* Min / Max inputs with currency prefix */}
+                        <div className="flex gap-2 items-center">
+                          <div className="relative flex-1">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground select-none">
+                              {selected?.symbol ?? "$"}
+                            </span>
+                            <Input
+                              type="number"
+                              placeholder="Min"
+                              min={1}
+                              className="pl-8"
+                              {...register("budgetMin", { valueAsNumber: true })}
+                            />
+                          </div>
+                          <span className="text-muted-foreground text-sm shrink-0">—</span>
+                          <div className="relative flex-1">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground select-none">
+                              {selected?.symbol ?? "$"}
+                            </span>
+                            <Input
+                              type="number"
+                              placeholder="Max"
+                              min={1}
+                              className="pl-8"
+                              {...register("budgetMax", { valueAsNumber: true })}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  }}
+                />
+                {errors.currency && (
+                  <p className="text-xs text-destructive">{errors.currency.message}</p>
+                )}
                 {errors.budgetMin && (
                   <p className="text-xs text-destructive">{errors.budgetMin.message}</p>
                 )}
