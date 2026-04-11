@@ -53,7 +53,6 @@ const CURRENCIES = [
   { code: "JPY", symbol: "¥",  label: "JPY" },
 ] as const;
 
-type CurrencyCode = (typeof CURRENCIES)[number]["code"];
 
 // ── Schema (Zod v4) ───────────────────────────────────────────────────────
 
