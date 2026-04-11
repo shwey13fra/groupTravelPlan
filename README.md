@@ -1,36 +1,106 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TripSync
 
-## Getting Started
+Group trip planning — without the chaos. A portfolio prototype built with Next.js 14, Supabase, and Claude AI.
 
-First, run the development server:
+---
+
+## Tech Stack
+
+- **Next.js 14** App Router + TypeScript strict mode
+- **Tailwind CSS** + shadcn/ui (New York style)
+- **Supabase** — Postgres, Realtime, Storage, Auth
+- **Anthropic SDK** (`claude-sonnet-4-6`) for AI nudges
+- **Vercel** for deployment
+
+---
+
+## Local Setup
 
 ```bash
+npm install
+cp .env.example .env.local   # then fill in values (see below)
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Supabase Setup (Dashboard — no CLI needed)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Step 1 — Create a Supabase project
+Go to https://supabase.com, create a new project, and wait for it to provision.
 
-## Learn More
+### Step 2 — Run the schema migration
+1. In your Supabase project, go to **SQL Editor**
+2. Click **New query**
+3. Copy the entire contents of `supabase/migrations/001_initial_schema.sql` and paste it in
+4. Click **Run**
+5. You should see "Success. No rows returned."
 
-To learn more about Next.js, take a look at the following resources:
+### Step 3 — Set up Storage
+1. Still in **SQL Editor**, click **New query**
+2. Copy the entire contents of `supabase/migrations/002_storage.sql` and paste it in
+3. Click **Run**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   > If you get a "bucket already exists" error, that's fine — the `ON CONFLICT DO NOTHING` handles it.
+   > If you prefer the UI: go to **Storage → Create bucket**, name it `trip-vault`, toggle **Public bucket** on.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Step 4 — Enable Realtime
+Go to **Database → Replication** and enable Realtime for these tables:
 
-## Deploy on Vercel
+| Table                    | Reason                              |
+|--------------------------|-------------------------------------|
+| `trips`                  | AI nudge updates                    |
+| `trip_members`           | Commitment status changes           |
+| `destination_suggestions`| New suggestions appear live         |
+| `destination_votes`      | Vote counts update in real time     |
+| `itinerary_items`        | Collaborative itinerary editing     |
+| `tasks`                  | Task status syncs across members    |
+| `expenses`               | New expenses visible immediately    |
+| `expense_splits`         | Settlement status syncs             |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Step 5 — Get your API keys
+Go to **Project Settings → API** and copy:
+- `Project URL` → `NEXT_PUBLIC_SUPABASE_URL`
+- `anon public` key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `service_role` key → `SUPABASE_SERVICE_ROLE_KEY` (keep this secret — server only)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Environment Variables
+
+Create `.env.local` in the project root:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+ANTHROPIC_API_KEY=your-anthropic-api-key
+```
+
+For Vercel: add the same four keys in **Project Settings → Environment Variables**.
+
+---
+
+## Vercel Deployment
+
+```bash
+# Push to GitHub (already connected to Vercel)
+git push origin master
+```
+
+Or connect the GitHub repo to Vercel via the dashboard. Set env vars before the first deploy.
+
+---
+
+## Project Structure
+
+```
+/app                    Next.js App Router pages
+/components/ui          shadcn/ui components
+/components/trip        Custom trip components
+/lib/supabase           Browser + server Supabase clients
+/lib/anthropic          Anthropic SDK wrapper
+/lib/types              Shared TypeScript types (database.ts)
+/supabase/migrations    SQL migration files
+/scripts                Utility scripts (smoke test etc.)
+```
