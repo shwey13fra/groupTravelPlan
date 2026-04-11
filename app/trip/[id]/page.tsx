@@ -1,29 +1,31 @@
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import { ChevronRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import ShareButton from "@/components/trip/ShareButton";
+import ShareButton        from "@/components/trip/ShareButton";
+import CommitmentWidget   from "@/components/trip/CommitmentWidget";
+import DestinationVoting  from "@/components/trip/DestinationVoting";
 
 const SECTION_CARDS = [
-  { title: "Destinations", emoji: "📍", sub: "Vote on where you're headed" },
-  { title: "Itinerary",    emoji: "🗓️", sub: "Day-by-day plan" },
-  { title: "Tasks",        emoji: "✅", sub: "Who's doing what" },
-  { title: "Vault",        emoji: "📁", sub: "Docs, links, and notes" },
-  { title: "Expenses",     emoji: "💸", sub: "Split costs, settle up" },
+  { title: "Itinerary", emoji: "🗓️", sub: "Day-by-day plan" },
+  { title: "Tasks",     emoji: "✅", sub: "Who's doing what" },
+  { title: "Vault",     emoji: "📁", sub: "Docs, links, and notes" },
+  { title: "Expenses",  emoji: "💸", sub: "Split costs, settle up" },
 ];
 
 const VIBE_LABELS: Record<string, string> = {
-  beach: "Beach",
+  beach:     "Beach",
   mountains: "Mountains",
-  city: "City",
-  heritage: "Heritage",
+  city:      "City",
+  heritage:  "Heritage",
   adventure: "Adventure",
 };
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-US", {
     month: "short",
-    day: "numeric",
-    year: "numeric",
+    day:   "numeric",
+    year:  "numeric",
   });
 }
 
@@ -34,25 +36,46 @@ export default async function TripPage({
 }) {
   const supabase = await createClient();
 
-  const { data: trip } = await supabase
-    .from("trips")
-    .select("*")
-    .eq("id", params.id)
-    .maybeSingle();
+  // Batch both fetches in parallel
+  const [{ data: trip }, cookieStore] = await Promise.all([
+    supabase.from("trips").select("*").eq("id", params.id).maybeSingle(),
+    cookies(),
+  ]);
 
   if (!trip) notFound();
 
-  const { data: members } = await supabase
-    .from("trip_members")
-    .select("*")
-    .eq("trip_id", trip.id)
-    .order("created_at", { ascending: true });
+  // Identify current member from cookie
+  const currentMemberId = cookieStore.get(`tmid_${trip.id}`)?.value ?? null;
 
-  const memberList = members ?? [];
+  // Remaining fetches in parallel
+  const [membersRes, suggestionsRes, votesRes] = await Promise.all([
+    supabase
+      .from("trip_members")
+      .select("*")
+      .eq("trip_id", trip.id)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("destination_suggestions")
+      .select("*")
+      .eq("trip_id", trip.id)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("destination_votes")
+      .select("*")
+      .eq("trip_id", trip.id),
+  ]);
+
+  const memberList  = membersRes.data   ?? [];
+  const suggestions = suggestionsRes.data ?? [];
+  const votes       = votesRes.data      ?? [];
+
+  const currentMember = memberList.find((m) => m.id === currentMemberId) ?? null;
+  const isOrganizer   = currentMember?.is_organizer ?? false;
+  const confirmedCount = memberList.filter((m) => m.commitment_status === "in").length;
 
   const metaLine = [
-    trip.vibe ? VIBE_LABELS[trip.vibe] : null,
-    trip.month ?? null,
+    trip.vibe        ? VIBE_LABELS[trip.vibe] : null,
+    trip.month       ?? null,
     trip.duration_days ? `${trip.duration_days} days` : null,
   ]
     .filter(Boolean)
@@ -66,7 +89,7 @@ export default async function TripPage({
   return (
     <main className="min-h-screen bg-[#FAF8F5]">
 
-      {/* ── Dark hero ─────────────────────────────────────────────────────── */}
+      {/* ── Dark hero ─────────────────────────────────────────────────── */}
       <div className="bg-gradient-to-b from-[#1C2B4A] to-[#243558] px-6 pt-14 pb-10">
         <div className="mx-auto w-full max-w-2xl space-y-3">
           {metaLine && (
@@ -92,13 +115,24 @@ export default async function TripPage({
         </div>
       </div>
 
-      {/* ── Content ───────────────────────────────────────────────────────── */}
+      {/* ── Content ───────────────────────────────────────────────────── */}
       <div className="mx-auto max-w-2xl px-6 py-8 space-y-8">
 
         {/* AI nudge */}
         <p className="border-l-[3px] border-amber-400 pl-4 text-sm text-foreground/65 leading-relaxed italic">
           {trip.ai_nudge ?? "Welcome! Share the invite link above to get everyone in."}
         </p>
+
+        {/* Commitment toggle (only if current browser is a member) */}
+        {currentMember && (
+          <CommitmentWidget
+            tripId={trip.id}
+            memberId={currentMember.id}
+            currentStatus={currentMember.commitment_status as "in" | "out" | "pending"}
+            confirmedCount={confirmedCount}
+            totalCount={memberList.length}
+          />
+        )}
 
         {/* Members */}
         <section className="space-y-3">
@@ -125,10 +159,21 @@ export default async function TripPage({
           </div>
         </section>
 
-        {/* Section rows */}
+        {/* Destination voting (client component — handles realtime) */}
+        <DestinationVoting
+          tripId={trip.id}
+          currentMemberId={currentMemberId}
+          isOrganizer={isOrganizer}
+          destinationLocked={trip.destination_locked}
+          lockedDestination={trip.destination}
+          initialSuggestions={suggestions}
+          initialVotes={votes}
+        />
+
+        {/* Remaining placeholder sections */}
         <section>
           <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground mb-1">
-            Trip sections
+            Coming up
           </h2>
           <div className="divide-y divide-[#E8E4DE]">
             {SECTION_CARDS.map((card) => (

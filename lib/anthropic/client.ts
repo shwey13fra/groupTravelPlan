@@ -1,5 +1,4 @@
 import Anthropic from "@anthropic-ai/sdk";
 
-export const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+// Singleton — SDK auto-reads ANTHROPIC_API_KEY from env
+export const anthropic = new Anthropic();

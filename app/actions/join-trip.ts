@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 
 const joinTripSchema = z.object({
@@ -32,17 +33,30 @@ export async function joinTrip(
     return { error: "Trip not found." };
   }
 
-  const { error } = await supabase.from("trip_members").insert({
-    trip_id: tripId,
-    name,
-    emoji,
-    is_organizer: false,
-    commitment_status: "pending",
-  });
+  const { data: member, error } = await supabase
+    .from("trip_members")
+    .insert({
+      trip_id: tripId,
+      name,
+      emoji,
+      is_organizer: false,
+      commitment_status: "pending",
+    })
+    .select("id")
+    .single();
 
-  if (error) {
+  if (error || !member) {
     return { error: "Failed to join trip. Please try again." };
   }
+
+  // Identify this browser as this member for this trip
+  const cookieStore = await cookies();
+  cookieStore.set(`tmid_${tripId}`, member.id, {
+    path:     "/",
+    maxAge:   60 * 60 * 24 * 30, // 30 days
+    sameSite: "lax",
+    httpOnly: true,
+  });
 
   redirect(`/trip/${tripId}`);
 }

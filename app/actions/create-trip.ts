@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 
 // No ambiguous chars: 0 O I 1
@@ -84,19 +85,32 @@ export async function createTrip(
     return { error: "Failed to create trip. Please try again." };
   }
 
-  // Insert organizer as a trip member
-  const { error: memberError } = await supabase.from("trip_members").insert({
-    trip_id: trip.id,
-    name: data.organizerName,
-    emoji: data.organizerEmoji,
-    is_organizer: true,
-    commitment_status: "in",
-  });
+  // Insert organizer as a trip member — select id back to set cookie
+  const { data: member, error: memberError } = await supabase
+    .from("trip_members")
+    .insert({
+      trip_id: trip.id,
+      name: data.organizerName,
+      emoji: data.organizerEmoji,
+      is_organizer: true,
+      commitment_status: "in",
+    })
+    .select("id")
+    .single();
 
-  if (memberError) {
+  if (memberError || !member) {
     await supabase.from("trips").delete().eq("id", trip.id);
     return { error: "Failed to create trip. Please try again." };
   }
+
+  // Identify this browser as the organizer for this trip
+  const cookieStore = await cookies();
+  cookieStore.set(`tmid_${trip.id}`, member.id, {
+    path:     "/",
+    maxAge:   60 * 60 * 24 * 30, // 30 days
+    sameSite: "lax",
+    httpOnly: true,
+  });
 
   return { tripId: trip.id };
 }
