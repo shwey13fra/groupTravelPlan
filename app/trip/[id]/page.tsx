@@ -6,12 +6,12 @@ import ShareButton        from "@/components/trip/ShareButton";
 import CommitmentWidget   from "@/components/trip/CommitmentWidget";
 import DestinationVoting  from "@/components/trip/DestinationVoting";
 import ItinerarySection   from "@/components/trip/ItinerarySection";
-import type { ItineraryDay, ItineraryItem, ItemSuggestion, SuggestionVote } from "@/lib/types/database";
+import TaskBoard           from "@/components/trip/TaskBoard";
+import type { ItineraryDay, ItineraryItem, ItemSuggestion, SuggestionVote, Task } from "@/lib/types/database";
 
 const SECTION_CARDS = [
-  { title: "Tasks",   emoji: "✅", sub: "Who's doing what" },
-  { title: "Vault",   emoji: "📁", sub: "Docs, links, and notes" },
-  { title: "Expenses",emoji: "💸", sub: "Split costs, settle up" },
+  { title: "Vault",    emoji: "📁", sub: "Docs, links, and notes" },
+  { title: "Expenses", emoji: "💸", sub: "Split costs, settle up" },
 ];
 
 const VIBE_LABELS: Record<string, string> = {
@@ -66,7 +66,7 @@ export default async function TripPage({
   }
 
   // Remaining fetches in parallel
-  const [membersRes, suggestionsRes, votesRes, daysRes] = await Promise.all([
+  const [membersRes, suggestionsRes, votesRes, daysRes, tasksRes] = await Promise.all([
     supabase
       .from("trip_members")
       .select("*")
@@ -86,12 +86,18 @@ export default async function TripPage({
       .select("*")
       .eq("trip_id", trip.id)
       .order("day_number", { ascending: true }),
+    supabase
+      .from("tasks")
+      .select("*")
+      .eq("trip_id", trip.id)
+      .order("created_at", { ascending: true }),
   ]);
 
-  const memberList  = membersRes.data   ?? [];
-  const suggestions = suggestionsRes.data ?? [];
-  const votes       = votesRes.data      ?? [];
-  const itineraryDays = (daysRes.data ?? []) as ItineraryDay[];
+  const memberList    = membersRes.data    ?? [];
+  const suggestions   = suggestionsRes.data ?? [];
+  const votes         = votesRes.data       ?? [];
+  const itineraryDays = (daysRes.data  ?? []) as ItineraryDay[];
+  const taskList      = (tasksRes.data ?? []) as Task[];
 
   // Fetch items → suggestions → votes (each step depends on the previous)
   let itineraryItems: ItineraryItem[]   = [];
@@ -253,7 +259,16 @@ export default async function TripPage({
           initialSuggestionVotes={suggestionVotes}
         />
 
-        {/* Placeholder sections: Tasks, Vault, Expenses */}
+        {/* Task board (client component — realtime, organizer add, assignee status change) */}
+        <TaskBoard
+          tripId={trip.id}
+          isOrganizer={isOrganizer}
+          currentMemberId={currentMemberId}
+          members={memberList}
+          initialTasks={taskList}
+        />
+
+        {/* Placeholder sections: Vault, Expenses */}
         <section>
           <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground mb-1">
             Coming up
