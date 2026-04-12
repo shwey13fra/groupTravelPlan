@@ -6,7 +6,7 @@ import ShareButton        from "@/components/trip/ShareButton";
 import CommitmentWidget   from "@/components/trip/CommitmentWidget";
 import DestinationVoting  from "@/components/trip/DestinationVoting";
 import ItinerarySection   from "@/components/trip/ItinerarySection";
-import type { ItineraryDay, ItineraryItem, ItemSuggestion } from "@/lib/types/database";
+import type { ItineraryDay, ItineraryItem, ItemSuggestion, SuggestionVote } from "@/lib/types/database";
 
 const SECTION_CARDS = [
   { title: "Tasks",   emoji: "✅", sub: "Who's doing what" },
@@ -93,9 +93,10 @@ export default async function TripPage({
   const votes       = votesRes.data      ?? [];
   const itineraryDays = (daysRes.data ?? []) as ItineraryDay[];
 
-  // Fetch items + suggestions if we have days
-  let itineraryItems: ItineraryItem[] = [];
+  // Fetch items → suggestions → votes (each step depends on the previous)
+  let itineraryItems: ItineraryItem[]   = [];
   let itemSuggestions: ItemSuggestion[] = [];
+  let suggestionVotes: SuggestionVote[] = [];
 
   if (itineraryDays.length > 0) {
     const dayIds = itineraryDays.map((d) => d.id);
@@ -114,6 +115,15 @@ export default async function TripPage({
         .select("*")
         .in("item_id", itemIds);
       itemSuggestions = (sugData ?? []) as ItemSuggestion[];
+
+      if (itemSuggestions.length > 0) {
+        const suggestionIds = itemSuggestions.map((s) => s.id);
+        const { data: voteData } = await supabase
+          .from("suggestion_votes")
+          .select("*")
+          .in("suggestion_id", suggestionIds);
+        suggestionVotes = (voteData ?? []) as SuggestionVote[];
+      }
     }
   }
 
@@ -218,15 +228,17 @@ export default async function TripPage({
           initialVotes={votes}
         />
 
-        {/* Itinerary (client component — realtime, generate button, swap suggestions) */}
+        {/* Itinerary (client component — realtime, generate button, swap voting) */}
         <ItinerarySection
           tripId={trip.id}
           isOrganizer={isOrganizer}
           currentMemberId={currentMemberId}
           destinationLocked={trip.destination_locked}
+          totalMembersCount={memberList.length}
           initialDays={itineraryDays}
           initialItems={itineraryItems}
           initialSuggestions={itemSuggestions}
+          initialSuggestionVotes={suggestionVotes}
         />
 
         {/* Placeholder sections: Tasks, Vault, Expenses */}

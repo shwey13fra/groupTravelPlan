@@ -100,7 +100,19 @@ export interface ItemSuggestion {
   item_id: string;
   suggested_by: string | null;
   suggestion_text: string;
+  // Structured fields — set only for organizer swap proposals (enables voting)
+  suggested_title: string | null;
+  suggested_description: string | null;
+  suggested_location: string | null;
   status: SuggestionStatus;
+  created_at: string;
+}
+
+export interface SuggestionVote {
+  id: string;
+  suggestion_id: string;
+  member_id: string;
+  vote: "yes" | "no";
   created_at: string;
 }
 
@@ -215,6 +227,14 @@ export type Database = {
           created_at?: string;
         };
         Update: Partial<Omit<ItemSuggestion, "id" | "created_at">>;
+      };
+      suggestion_votes: {
+        Row: SuggestionVote;
+        Insert: Omit<SuggestionVote, "id" | "created_at"> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<Omit<SuggestionVote, "id" | "created_at">>;
       };
       tasks: {
         Row: Task;
