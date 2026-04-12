@@ -13,6 +13,10 @@ const VIBE_EMOJI: Record<string, string> = {
   adventure: "🎒",
 };
 
+function formatShortDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
 export default async function MyTripsPage() {
   const supabase = await createClient();
 
@@ -21,19 +25,35 @@ export default async function MyTripsPage() {
 
   const { data: memberships } = await supabase
     .from("trip_members")
-    .select("id, trip_id, trips(id, name, vibe, month, status, join_code, destination_locked, destination)")
+    .select("trip_id, trips(id, name, vibe, month, status, join_code, destination_locked, destination, start_date, end_date, duration_days)")
     .eq("user_id", user.id)
     .eq("is_organizer", true)
     .order("created_at", { ascending: false });
 
   type TripRow = {
     id: string; name: string; vibe: string | null; month: string | null;
-    status: string; join_code: string; destination_locked: boolean; destination: string | null;
+    status: string; join_code: string; destination_locked: boolean;
+    destination: string | null; start_date: string | null;
+    end_date: string | null; duration_days: number | null;
   };
 
   const trips = (memberships ?? [])
     .flatMap((m) => (Array.isArray(m.trips) ? m.trips : [m.trips]))
     .filter(Boolean) as unknown as TripRow[];
+
+  // Batch member count for all trips in one query
+  let memberCountByTripId: Record<string, number> = {};
+  if (trips.length > 0) {
+    const tripIds = trips.map((t) => t.id);
+    const { data: memberRows } = await supabase
+      .from("trip_members")
+      .select("trip_id")
+      .in("trip_id", tripIds);
+    memberCountByTripId = (memberRows ?? []).reduce<Record<string, number>>((acc, m) => {
+      acc[m.trip_id] = (acc[m.trip_id] ?? 0) + 1;
+      return acc;
+    }, {});
+  }
 
   return (
     <main className="min-h-screen bg-[#FAF8F5]">
@@ -73,32 +93,60 @@ export default async function MyTripsPage() {
           </div>
         ) : (
           <>
-            {trips.map((trip) => (
-              <Link
-                key={trip.id}
-                href={`/trip/${trip.id}`}
-                className="flex items-center justify-between rounded-xl border border-[#E8E4DE] bg-white px-5 py-4 shadow-sm hover:shadow-md hover:border-[#C8C4BC] transition-all group"
-              >
-                <div className="space-y-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    {trip.vibe && (
-                      <span className="text-lg">{VIBE_EMOJI[trip.vibe] ?? "✈️"}</span>
+            {trips.map((trip) => {
+              const memberCount = memberCountByTripId[trip.id] ?? 0;
+
+              // Build date string
+              const dateStr = trip.start_date && trip.end_date
+                ? `${formatShortDate(trip.start_date)} – ${formatShortDate(trip.end_date)}`
+                : trip.duration_days
+                ? `${trip.duration_days} days`
+                : null;
+
+              // Build meta line
+              const metaParts = [
+                trip.destination_locked && trip.destination ? `📍 ${trip.destination}` : trip.month ? `Planned for ${trip.month}` : null,
+                dateStr,
+                memberCount > 0 ? `${memberCount} member${memberCount !== 1 ? "s" : ""}` : null,
+              ].filter(Boolean);
+
+              return (
+                <Link
+                  key={trip.id}
+                  href={`/trip/${trip.id}`}
+                  className="flex items-center justify-between rounded-xl border border-[#E8E4DE] bg-white px-5 py-4 shadow-sm hover:shadow-md hover:border-[#C8C4BC] transition-all group"
+                >
+                  <div className="space-y-1.5 min-w-0">
+                    <div className="flex items-center gap-2">
+                      {trip.vibe && (
+                        <span className="text-lg">{VIBE_EMOJI[trip.vibe] ?? "✈️"}</span>
+                      )}
+                      <p className="font-display text-2xl text-foreground leading-tight truncate">
+                        {trip.name}
+                      </p>
+                    </div>
+                    {metaParts.length > 0 && (
+                      <p className="text-xs text-muted-foreground truncate">
+                        {metaParts.join(" · ")}
+                      </p>
                     )}
-                    <p className="font-display text-2xl text-foreground leading-tight truncate">
-                      {trip.name}
-                    </p>
+                    {/* Status badge */}
+                    <div>
+                      {trip.destination_locked ? (
+                        <span className="inline-block text-[10px] font-medium bg-emerald-50 text-emerald-600 rounded-full px-2 py-0.5">
+                          Destination locked ✓
+                        </span>
+                      ) : (
+                        <span className="inline-block text-[10px] font-medium bg-[#F4F1EC] text-muted-foreground rounded-full px-2 py-0.5">
+                          Planning
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    {trip.destination_locked && trip.destination
-                      ? `📍 ${trip.destination}`
-                      : trip.month
-                      ? `Planned for ${trip.month}`
-                      : "Planning in progress"}
-                  </p>
-                </div>
-                <ArrowRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground shrink-0 transition-colors ml-4" />
-              </Link>
-            ))}
+                  <ArrowRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground shrink-0 transition-colors ml-4" />
+                </Link>
+              );
+            })}
 
             <Button
               asChild
