@@ -97,9 +97,12 @@ export async function generateItinerary(
   }
 
   // ── Parse & validate ──────────────────────────────────────────────────────
+  // Strip markdown code fences if Claude wraps the JSON (e.g. ```json ... ```)
+  const cleaned = rawText.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
+
   let itinerary: z.infer<typeof ItinerarySchema>;
   try {
-    itinerary = ItinerarySchema.parse(JSON.parse(rawText));
+    itinerary = ItinerarySchema.parse(JSON.parse(cleaned));
   } catch {
     return { error: "AI returned an unexpected format. Please try again." };
   }
