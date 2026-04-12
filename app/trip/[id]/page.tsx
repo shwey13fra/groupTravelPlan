@@ -198,22 +198,34 @@ export default async function TripPage({
             Members · {memberList.length}
           </h2>
           <div className="flex gap-2 overflow-x-auto pb-1">
-            {memberList.map((m) => (
-              <div
-                key={m.id}
-                className="flex-shrink-0 flex items-center gap-2 rounded-full border border-[#E8E4DE] bg-white px-3 py-2 shadow-sm"
-              >
-                <span className="text-base leading-none">{m.emoji}</span>
-                <span className="text-sm font-medium text-foreground whitespace-nowrap">
-                  {m.name}
-                </span>
-                {m.is_organizer && (
-                  <span className="text-[9px] bg-[#1C2B4A] text-white rounded-full px-1.5 py-0.5 font-bold uppercase tracking-wider">
-                    Org
+            {memberList.map((m) => {
+              const isMe = m.id === currentMemberId;
+              return (
+                <div
+                  key={m.id}
+                  className={`flex-shrink-0 flex items-center gap-2 rounded-full border px-3 py-2 shadow-sm ${
+                    isMe
+                      ? "border-[#1C2B4A]/30 bg-[#1C2B4A]/[0.06] ring-1 ring-[#1C2B4A]/20"
+                      : "border-[#E8E4DE] bg-white"
+                  }`}
+                >
+                  <span className="text-base leading-none">{m.emoji}</span>
+                  <span className="text-sm font-medium text-foreground whitespace-nowrap">
+                    {m.name}
                   </span>
-                )}
-              </div>
-            ))}
+                  {isMe && (
+                    <span className="text-[9px] bg-[#1C2B4A]/10 text-[#1C2B4A] rounded-full px-1.5 py-0.5 font-bold uppercase tracking-wider">
+                      You
+                    </span>
+                  )}
+                  {m.is_organizer && (
+                    <span className="text-[9px] bg-[#1C2B4A] text-white rounded-full px-1.5 py-0.5 font-bold uppercase tracking-wider">
+                      Org
+                    </span>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </section>
 
