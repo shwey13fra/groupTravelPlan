@@ -59,10 +59,11 @@ export async function suggestDestinations(
     return { error: `AI error: ${msg}` };
   }
 
-  // Parse & validate
+  // Parse & validate — strip markdown fences if Claude wraps the response
+  const cleaned = rawText.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
   let suggestions: z.infer<typeof aiSchema>;
   try {
-    suggestions = aiSchema.parse(JSON.parse(rawText));
+    suggestions = aiSchema.parse(JSON.parse(cleaned));
   } catch {
     return { error: "AI returned an unexpected format. Please try again." };
   }
