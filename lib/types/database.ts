@@ -13,6 +13,7 @@ export type ItineraryItemType = "activity" | "meal" | "transport" | "buffer";
 export type TaskStatus = "todo" | "in_progress" | "done";
 export type SplitType = "equal" | "custom";
 export type VaultItemType = "pdf" | "link" | "note";
+export type SuggestionStatus = "pending" | "approved" | "rejected";
 
 // ── Row types ────────────────────────────────────────────────────────────
 export interface Trip {
@@ -92,6 +93,15 @@ export interface ItineraryItem {
   order_index: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface ItemSuggestion {
+  id: string;
+  item_id: string;
+  suggested_by: string | null;
+  suggestion_text: string;
+  status: SuggestionStatus;
+  created_at: string;
 }
 
 export interface Task {
@@ -197,6 +207,14 @@ export type Database = {
           updated_at?: string;
         };
         Update: Partial<Omit<ItineraryItem, "id" | "created_at" | "updated_at">>;
+      };
+      item_suggestions: {
+        Row: ItemSuggestion;
+        Insert: Omit<ItemSuggestion, "id" | "created_at"> & {
+          id?: string;
+          created_at?: string;
+        };
+        Update: Partial<Omit<ItemSuggestion, "id" | "created_at">>;
       };
       tasks: {
         Row: Task;

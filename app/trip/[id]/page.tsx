@@ -5,12 +5,13 @@ import { createClient } from "@/lib/supabase/server";
 import ShareButton        from "@/components/trip/ShareButton";
 import CommitmentWidget   from "@/components/trip/CommitmentWidget";
 import DestinationVoting  from "@/components/trip/DestinationVoting";
+import ItinerarySection   from "@/components/trip/ItinerarySection";
+import type { ItineraryDay, ItineraryItem, ItemSuggestion } from "@/lib/types/database";
 
 const SECTION_CARDS = [
-  { title: "Itinerary", emoji: "🗓️", sub: "Day-by-day plan" },
-  { title: "Tasks",     emoji: "✅", sub: "Who's doing what" },
-  { title: "Vault",     emoji: "📁", sub: "Docs, links, and notes" },
-  { title: "Expenses",  emoji: "💸", sub: "Split costs, settle up" },
+  { title: "Tasks",   emoji: "✅", sub: "Who's doing what" },
+  { title: "Vault",   emoji: "📁", sub: "Docs, links, and notes" },
+  { title: "Expenses",emoji: "💸", sub: "Split costs, settle up" },
 ];
 
 const VIBE_LABELS: Record<string, string> = {
@@ -65,7 +66,7 @@ export default async function TripPage({
   }
 
   // Remaining fetches in parallel
-  const [membersRes, suggestionsRes, votesRes] = await Promise.all([
+  const [membersRes, suggestionsRes, votesRes, daysRes] = await Promise.all([
     supabase
       .from("trip_members")
       .select("*")
@@ -80,11 +81,41 @@ export default async function TripPage({
       .from("destination_votes")
       .select("*")
       .eq("trip_id", trip.id),
+    supabase
+      .from("itinerary_days")
+      .select("*")
+      .eq("trip_id", trip.id)
+      .order("day_number", { ascending: true }),
   ]);
 
   const memberList  = membersRes.data   ?? [];
   const suggestions = suggestionsRes.data ?? [];
   const votes       = votesRes.data      ?? [];
+  const itineraryDays = (daysRes.data ?? []) as ItineraryDay[];
+
+  // Fetch items + suggestions if we have days
+  let itineraryItems: ItineraryItem[] = [];
+  let itemSuggestions: ItemSuggestion[] = [];
+
+  if (itineraryDays.length > 0) {
+    const dayIds = itineraryDays.map((d) => d.id);
+    const { data: itemsData } = await supabase
+      .from("itinerary_items")
+      .select("*")
+      .in("day_id", dayIds)
+      .order("order_index", { ascending: true });
+
+    itineraryItems = (itemsData ?? []) as ItineraryItem[];
+
+    if (itineraryItems.length > 0) {
+      const itemIds = itineraryItems.map((i) => i.id);
+      const { data: sugData } = await supabase
+        .from("item_suggestions")
+        .select("*")
+        .in("item_id", itemIds);
+      itemSuggestions = (sugData ?? []) as ItemSuggestion[];
+    }
+  }
 
   const currentMember = memberList.find((m) => m.id === currentMemberId) ?? null;
   const isOrganizer   = currentMember?.is_organizer ?? false;
@@ -187,7 +218,18 @@ export default async function TripPage({
           initialVotes={votes}
         />
 
-        {/* Remaining placeholder sections */}
+        {/* Itinerary (client component — realtime, generate button, swap suggestions) */}
+        <ItinerarySection
+          tripId={trip.id}
+          isOrganizer={isOrganizer}
+          currentMemberId={currentMemberId}
+          destinationLocked={trip.destination_locked}
+          initialDays={itineraryDays}
+          initialItems={itineraryItems}
+          initialSuggestions={itemSuggestions}
+        />
+
+        {/* Placeholder sections: Tasks, Vault, Expenses */}
         <section>
           <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground mb-1">
             Coming up
