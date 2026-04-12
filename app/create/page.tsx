@@ -22,12 +22,6 @@ const EMOJIS = [
   "🌟", "🎉", "🍕", "🎸", "🏄", "🧗",
 ] as const;
 
-const MONTHS = [
-  "January", "February", "March", "April",
-  "May", "June", "July", "August",
-  "September", "October", "November", "December",
-] as const;
-
 const VIBES = [
   { value: "beach",     emoji: "🏖️", label: "Beach" },
   { value: "mountains", emoji: "⛰️", label: "Mountains" },
@@ -66,22 +60,26 @@ const formSchema = z
     currency:       z.string().min(1, "Pick a currency"),
     budgetMin:      z.number().int().min(1, "Enter a minimum budget"),
     budgetMax:      z.number().int().min(1, "Enter a maximum budget"),
-    durationDays:   z.number().int().min(1, "At least 1 day").max(30, "Max 30 days"),
+    startDate:      z.string().min(1, "Start date required"),
+    endDate:        z.string().min(1, "End date required"),
     vibe:      z.enum(["beach", "mountains", "city", "heritage", "adventure"] as const),
-    month:     z.enum(MONTHS),
     groupType: z.enum(["friends", "family", "mixed"] as const),
   })
   .refine((d) => d.budgetMax > d.budgetMin, {
     message: "Max must be greater than min",
     path: ["budgetMax"],
+  })
+  .refine((d) => !d.startDate || !d.endDate || d.endDate >= d.startDate, {
+    message: "End date must be after start date",
+    path: ["endDate"],
   });
 
 type FormData = z.infer<typeof formSchema>;
 
 const STEP_FIELDS: Record<1 | 2 | 3, (keyof FormData)[]> = {
   1: ["tripName", "organizerName", "organizerEmoji"],
-  2: ["groupSize", "currency", "budgetMin", "budgetMax", "durationDays"],
-  3: ["vibe", "month", "groupType"],
+  2: ["groupSize", "currency", "budgetMin", "budgetMax", "startDate", "endDate"],
+  3: ["vibe", "groupType"],
 };
 
 const STEP_TITLES = {
@@ -345,18 +343,32 @@ export default function CreatePage() {
                 )}
               </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="durationDays">Duration (days)</Label>
-                <Input
-                  id="durationDays"
-                  type="number"
-                  placeholder="e.g. 5"
-                  min={1}
-                  max={30}
-                  {...register("durationDays", { valueAsNumber: true })}
-                />
-                {errors.durationDays && (
-                  <p className="text-xs text-destructive">{errors.durationDays.message}</p>
+              <div className="space-y-3">
+                <Label>Trip dates</Label>
+                <div className="flex gap-2 items-center">
+                  <div className="flex-1 space-y-1">
+                    <p className="text-xs text-muted-foreground">Start</p>
+                    <Input
+                      id="startDate"
+                      type="date"
+                      {...register("startDate")}
+                    />
+                  </div>
+                  <span className="text-muted-foreground text-sm shrink-0 pt-5">—</span>
+                  <div className="flex-1 space-y-1">
+                    <p className="text-xs text-muted-foreground">End</p>
+                    <Input
+                      id="endDate"
+                      type="date"
+                      {...register("endDate")}
+                    />
+                  </div>
+                </div>
+                {errors.startDate && (
+                  <p className="text-xs text-destructive">{errors.startDate.message}</p>
+                )}
+                {errors.endDate && (
+                  <p className="text-xs text-destructive">{errors.endDate.message}</p>
                 )}
               </div>
 
@@ -399,37 +411,6 @@ export default function CreatePage() {
                 />
                 {errors.vibe && (
                   <p className="text-xs text-destructive">{errors.vibe.message}</p>
-                )}
-              </div>
-
-              {/* Month */}
-              <div className="space-y-2">
-                <Label>Approximate month</Label>
-                <Controller
-                  name="month"
-                  control={control}
-                  render={({ field }) => (
-                    <div className="grid grid-cols-3 gap-1.5">
-                      {MONTHS.map((month) => (
-                        <button
-                          key={month}
-                          type="button"
-                          onClick={() => field.onChange(month)}
-                          className={cn(
-                            "py-2 text-sm rounded-lg border font-medium transition-all min-h-[40px]",
-                            field.value === month
-                              ? "border-foreground bg-foreground text-background"
-                              : "border-border hover:border-foreground/40 text-foreground"
-                          )}
-                        >
-                          {month.slice(0, 3)}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                />
-                {errors.month && (
-                  <p className="text-xs text-destructive">{errors.month.message}</p>
                 )}
               </div>
 

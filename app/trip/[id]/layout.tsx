@@ -13,7 +13,7 @@ const VIBE_LABELS: Record<string, string> = {
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-US", {
-    month: "short", day: "numeric", year: "numeric",
+    month: "short", day: "numeric",
   });
 }
 
@@ -33,18 +33,18 @@ export default async function TripLayout({
 
   if (!trip) notFound();
 
-  const metaLine = [
-    trip.vibe         ? VIBE_LABELS[trip.vibe] : null,
-    trip.month        ?? null,
-    trip.duration_days ? `${trip.duration_days} days` : null,
-  ]
-    .filter(Boolean)
-    .join(" · ");
-
-  const dateLabel =
+  const dateRange =
     trip.start_date && trip.end_date
       ? `${formatDate(trip.start_date)} – ${formatDate(trip.end_date)}`
       : null;
+
+  const metaLine = [
+    trip.vibe ? VIBE_LABELS[trip.vibe] : null,
+    dateRange ?? (trip.month ?? null),
+    !dateRange && trip.duration_days ? `${trip.duration_days} days` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <div className="min-h-screen bg-[#FAF8F5]">
@@ -61,9 +61,6 @@ export default async function TripLayout({
           </h1>
           {trip.destination && (
             <p className="text-white/60 text-base">{trip.destination}</p>
-          )}
-          {dateLabel && (
-            <p className="text-white/50 text-sm">{dateLabel}</p>
           )}
           <div className="pt-2">
             <ShareButton

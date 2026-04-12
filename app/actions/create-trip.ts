@@ -23,17 +23,18 @@ const createTripSchema = z
     currency:      z.string().min(1),
     budgetMin:     z.coerce.number().int().min(1),
     budgetMax:     z.coerce.number().int().min(1),
-    durationDays:  z.coerce.number().int().min(1).max(30),
+    startDate:     z.string().min(1, "Start date required"),
+    endDate:       z.string().min(1, "End date required"),
     vibe:      z.enum(["beach", "mountains", "city", "heritage", "adventure"]),
-    month:     z.enum([
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December",
-    ]),
     groupType: z.enum(["friends", "family", "mixed"]),
   })
   .refine((d) => d.budgetMax > d.budgetMin, {
     message: "Max budget must be greater than min budget",
     path: ["budgetMax"],
+  })
+  .refine((d) => d.endDate >= d.startDate, {
+    message: "End date must be after start date",
+    path: ["endDate"],
   });
 
 type CreateTripInput = z.infer<typeof createTripSchema>;
@@ -62,18 +63,26 @@ export async function createTrip(
     joinCode = generateJoinCode();
   }
 
+  // Derive month + duration from the date range
+  const start = new Date(data.startDate);
+  const end   = new Date(data.endDate);
+  const month = start.toLocaleString("en-US", { month: "long" });
+  const durationDays = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+
   // Insert trip
   const { data: trip, error: tripError } = await supabase
     .from("trips")
     .insert({
       name: data.tripName,
       vibe: data.vibe,
-      month: data.month,
+      month,
       group_type: data.groupType,
       currency: data.currency,
       budget_min: data.budgetMin,
       budget_max: data.budgetMax,
-      duration_days: data.durationDays,
+      duration_days: durationDays,
+      start_date: data.startDate,
+      end_date: data.endDate,
       join_code: joinCode,
       status: "planning",
       destination_locked: false,
