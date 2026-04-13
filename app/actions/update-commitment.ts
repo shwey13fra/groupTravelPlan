@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { refreshNudge } from "@/app/actions/refresh-nudge";
 
 const schema = z.object({
   memberId:      z.string().uuid(),
@@ -33,6 +34,7 @@ export async function updateCommitment(
 
   if (error) return { error: "Failed to update. Please try again." };
 
+  try { await refreshNudge(tripId); } catch {}
   revalidatePath(`/trip/${tripId}`);
   return {};
 }

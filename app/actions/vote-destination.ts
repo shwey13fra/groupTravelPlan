@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { refreshNudge } from "@/app/actions/refresh-nudge";
 
 const schema = z.object({
   tripId:       z.string().uuid(),
@@ -26,5 +27,6 @@ export async function voteDestination(
   );
 
   if (error) return { error: "Failed to vote. Please try again." };
+  try { await refreshNudge(tripId); } catch {}
   return {};
 }

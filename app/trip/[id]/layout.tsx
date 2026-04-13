@@ -1,7 +1,10 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import ShareButton  from "@/components/trip/ShareButton";
 import TripTabNav   from "@/components/trip/TripTabNav";
+import { signOut }  from "@/app/actions/sign-out";
 
 const VIBE_LABELS: Record<string, string> = {
   beach:     "Beach",
@@ -25,11 +28,14 @@ export default async function TripLayout({
   params: { id: string };
 }) {
   const supabase = await createClient();
-  const { data: trip } = await supabase
-    .from("trips")
-    .select("id, name, destination, start_date, end_date, duration_days, vibe, month, join_code")
-    .eq("id", params.id)
-    .maybeSingle();
+  const [{ data: trip }, { data: { session } }] = await Promise.all([
+    supabase
+      .from("trips")
+      .select("id, name, destination, start_date, end_date, duration_days, vibe, month, join_code")
+      .eq("id", params.id)
+      .maybeSingle(),
+    supabase.auth.getSession(),
+  ]);
 
   if (!trip) notFound();
 
@@ -49,8 +55,29 @@ export default async function TripLayout({
   return (
     <div className="min-h-screen bg-[#FAF8F5]">
       {/* ── Dark hero ──────────────────────────────────────────────────────── */}
-      <div className="bg-gradient-to-b from-[#1C2B4A] to-[#243558] px-6 pt-14 pb-8">
+      <div className="bg-gradient-to-b from-[#1C2B4A] to-[#243558] px-6 pt-8 pb-8">
         <div className="mx-auto w-full max-w-2xl space-y-3">
+
+          {/* Organizer top bar — only for authenticated users */}
+          {session && (
+            <div className="flex items-center justify-between pb-4">
+              <Link
+                href="/my-trips"
+                className="flex items-center gap-1.5 text-white/50 hover:text-white/80 text-xs transition-colors"
+              >
+                <ArrowLeft className="h-3 w-3" />
+                My trips
+              </Link>
+              <form action={signOut}>
+                <button
+                  type="submit"
+                  className="text-white/50 hover:text-white/80 text-xs transition-colors"
+                >
+                  Sign out
+                </button>
+              </form>
+            </div>
+          )}
           {metaLine && (
             <p className="text-white/40 text-xs uppercase tracking-[0.2em] font-medium">
               {metaLine}
