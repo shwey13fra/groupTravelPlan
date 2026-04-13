@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { refreshNudge } from "@/app/actions/refresh-nudge";
 
 const schema = z.object({
   taskId:             z.string().uuid(),
@@ -40,5 +41,7 @@ export async function updateTaskStatus(
     .eq("id", taskId);
 
   if (error) return { error: "Failed to update task. Try again." };
+
+  try { await refreshNudge(task.trip_id); } catch {}
   return {};
 }

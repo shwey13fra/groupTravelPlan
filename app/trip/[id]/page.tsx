@@ -3,6 +3,7 @@ import { createClient }      from "@/lib/supabase/server";
 import { getCurrentMemberId } from "@/lib/server/current-member";
 import CommitmentWidget   from "@/components/trip/CommitmentWidget";
 import DestinationVoting  from "@/components/trip/DestinationVoting";
+import NudgeBanner        from "@/components/trip/NudgeBanner";
 
 export default async function TripOverviewPage({
   params,
@@ -45,10 +46,8 @@ export default async function TripOverviewPage({
 
   return (
     <div className="space-y-8">
-      {/* AI nudge */}
-      <p className="border-l-[3px] border-amber-400 pl-4 text-sm text-foreground/65 leading-relaxed italic">
-        {trip.ai_nudge ?? "Welcome! Share the invite link above to get everyone in."}
-      </p>
+      {/* AI nudge banner */}
+      <NudgeBanner tripId={trip.id} initialNudge={trip.ai_nudge} />
 
       {/* Commitment toggle */}
       {currentMember && (

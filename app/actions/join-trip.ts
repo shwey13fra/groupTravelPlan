@@ -3,7 +3,8 @@
 import { z } from "zod";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
+import { createClient }  from "@/lib/supabase/server";
+import { refreshNudge }  from "@/app/actions/refresh-nudge";
 
 const joinTripSchema = z.object({
   tripId: z.string().uuid(),
@@ -81,6 +82,9 @@ export async function joinTrip(
     sameSite: "lax",
     httpOnly: true,
   });
+
+  // Fire nudge (best-effort — redirect follows immediately)
+  try { await refreshNudge(tripId); } catch {}
 
   redirect(`/trip/${tripId}`);
 }

@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { refreshNudge }  from "@/app/actions/refresh-nudge";
 
 const schema = z.object({
   tripId:      z.string().uuid(),
@@ -25,6 +26,7 @@ export async function lockDestination(
 
   if (error) return { error: "Failed to lock destination. Please try again." };
 
+  try { await refreshNudge(tripId); } catch {}
   revalidatePath(`/trip/${tripId}`);
   return {};
 }

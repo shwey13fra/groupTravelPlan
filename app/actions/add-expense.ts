@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { refreshNudge } from "@/app/actions/refresh-nudge";
 
 const splitSchema = z.object({
   memberId: z.string().uuid(),
@@ -86,5 +87,6 @@ export async function addExpense(
     return { error: "Failed to save splits" };
   }
 
+  try { await refreshNudge(tripId); } catch {}
   return { expenseId: expense.id };
 }

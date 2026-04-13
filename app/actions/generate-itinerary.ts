@@ -2,7 +2,8 @@
 
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
-import { anthropic } from "@/lib/anthropic/client";
+import { anthropic }    from "@/lib/anthropic/client";
+import { refreshNudge } from "@/app/actions/refresh-nudge";
 
 // ── Zod schema for Claude response ───────────────────────────────────────────
 const ItemSchema = z.object({
@@ -138,5 +139,6 @@ export async function generateItinerary(
     if (itemsError) return { error: "Failed to save itinerary items." };
   }
 
+  try { await refreshNudge(tripId); } catch {}
   return {};
 }
