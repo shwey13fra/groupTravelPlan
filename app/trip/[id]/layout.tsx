@@ -62,10 +62,10 @@ export default async function TripLayout({
           {trip.destination && (
             <p className="text-white/60 text-base">{trip.destination}</p>
           )}
-          <div className="pt-2">
+          <div className="pt-2 flex justify-center sm:block">
             <ShareButton
               joinCode={trip.join_code}
-              className="border-white/25 text-white bg-white/5 hover:bg-white/15 hover:border-white/40 w-full sm:w-auto"
+              className="border-white/25 text-white bg-white/5 hover:bg-white/15 hover:border-white/40 sm:w-auto"
             />
           </div>
         </div>

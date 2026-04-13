@@ -213,9 +213,9 @@ export default function ExpenseSection({
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <>
-      {/* Tab header + Add button */}
+      {/* Tab header + Add button (desktop: side-by-side; mobile: tabs only) */}
       <div className="flex items-center justify-between mb-5">
-        <div className="flex bg-[#F0ECE6] rounded-full p-1 gap-0.5">
+        <div className="flex w-fit bg-[#F0ECE6] rounded-full p-1 gap-0.5">
           {(["expenses", "balances"] as const).map((t) => (
             <button
               key={t}
@@ -234,9 +234,10 @@ export default function ExpenseSection({
             </button>
           ))}
         </div>
+        {/* Desktop only — on mobile the button lives at the bottom of the list */}
         <Button
           onClick={openDialog}
-          className="gap-1.5 bg-[#1C2B4A] hover:bg-[#243558] text-white border-0 text-sm"
+          className="hidden sm:flex gap-1.5 bg-[#1C2B4A] hover:bg-[#243558] text-white border-0 text-sm"
           size="sm"
         >
           <Plus className="h-3.5 w-3.5" />
@@ -287,6 +288,14 @@ export default function ExpenseSection({
               );
             })
           )}
+          {/* Mobile: Add expense button at the bottom of the list */}
+          <Button
+            onClick={openDialog}
+            className="sm:hidden w-full gap-2 bg-[#1C2B4A] hover:bg-[#243558] text-white border-0"
+          >
+            <Plus className="h-4 w-4" />
+            Add expense
+          </Button>
         </div>
       )}
 
@@ -434,10 +443,15 @@ export default function ExpenseSection({
             {form.splitType === "custom" && parsedAmount > 0 && (
               <div className="space-y-2">
                 <div className="space-y-1 max-h-48 overflow-y-auto pr-1">
-                  {inMembers.filter((m) => m.id !== form.paidBy).map((m) => (
+                  {inMembers.map((m) => (
                     <div key={m.id} className="flex items-center gap-2">
                       <span className="text-base w-7 shrink-0">{m.emoji}</span>
-                      <span className="text-sm flex-1 min-w-0 truncate">{m.name}</span>
+                      <span className="text-sm flex-1 min-w-0 truncate">
+                        {m.name}
+                        {m.id === form.paidBy && (
+                          <span className="ml-1.5 text-[10px] text-muted-foreground">(payer)</span>
+                        )}
+                      </span>
                       <div className="relative w-28 shrink-0">
                         <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{sym}</span>
                         <Input

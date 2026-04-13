@@ -60,18 +60,19 @@ export async function addExpense(
       amount_owed: perPerson,
     }));
   } else {
-    // Custom splits
+    // Custom splits — all members including payer may be present.
+    // The payer's entry represents their own share (what they keep); we don't store it.
+    // Only non-payer entries become debt rows. All entries together must sum to the total.
     if (!splits || splits.length === 0) {
       await supabase.from("expenses").delete().eq("id", expense.id);
       return { error: "Custom split amounts required" };
     }
-    // Exclude payer self-split silently, then validate sum
-    const nonSelfSplits = splits.filter((s) => s.memberId !== paidBy);
-    const total = nonSelfSplits.reduce((sum, s) => sum + s.amount, 0);
-    if (Math.abs(total - amount) > 0.02) {
+    const allTotal = splits.reduce((sum, s) => sum + s.amount, 0);
+    if (Math.abs(allTotal - amount) > 0.02) {
       await supabase.from("expenses").delete().eq("id", expense.id);
-      return { error: `Split amounts must equal total (${total.toFixed(2)} ≠ ${amount.toFixed(2)})` };
+      return { error: `Split amounts must equal total (${allTotal.toFixed(2)} ≠ ${amount.toFixed(2)})` };
     }
+    const nonSelfSplits = splits.filter((s) => s.memberId !== paidBy);
     splitRows = nonSelfSplits.map((s) => ({
       expense_id:  expense.id,
       member_id:   s.memberId,

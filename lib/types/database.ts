@@ -32,6 +32,7 @@ export interface Trip {
   join_code: string;
   ai_nudge: string | null;
   destination_locked: boolean;
+  vault_public: boolean;
   last_ai_call_at: string | null;
   created_at: string;
   updated_at: string;
