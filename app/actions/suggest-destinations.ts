@@ -43,27 +43,30 @@ export async function suggestDestinations(
     `Budget per person: ${trip.currency ?? "USD"} ${trip.budget_min ?? "?"} – ${trip.budget_max ?? "?"}`,
   ].join(", ");
 
-  // Call Claude
+  // Call Claude — prefill "[" forces the array to start immediately
   let rawText: string;
   try {
     const msg = await anthropic.messages.create({
       model: "claude-sonnet-4-6",
       max_tokens: 1024,
       system:
-        'You are a travel planning assistant. Return ONLY valid JSON, no markdown fences, no commentary. Schema: an array of exactly 3 objects, each with "name" (string) and "reason" (string, max 20 words).',
-      messages: [{ role: "user", content: userPrompt }],
+        'You are a travel planning assistant. Respond with a JSON array only — no markdown, no commentary. ' +
+        'Schema: an array of exactly 3 objects, each with "name" (string) and "reason" (string, max 20 words).',
+      messages: [
+        { role: "user",      content: userPrompt },
+        { role: "assistant", content: "[" },
+      ],
     });
-    rawText = msg.content[0].type === "text" ? msg.content[0].text.trim() : "";
+    const continuation = msg.content[0].type === "text" ? msg.content[0].text.trim() : "";
+    rawText = "[" + continuation;
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     return { error: `AI error: ${msg}` };
   }
 
-  // Parse & validate — strip markdown fences if Claude wraps the response
-  const cleaned = rawText.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
   let suggestions: z.infer<typeof aiSchema>;
   try {
-    suggestions = aiSchema.parse(JSON.parse(cleaned));
+    suggestions = aiSchema.parse(JSON.parse(rawText));
   } catch {
     return { error: "AI returned an unexpected format. Please try again." };
   }

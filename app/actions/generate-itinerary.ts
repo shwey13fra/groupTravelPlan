@@ -90,27 +90,36 @@ export async function generateItinerary(
     .eq("id", tripId);
 
   // ── Call Claude ───────────────────────────────────────────────────────────
+  // Assistant prefill: seeding the response with "[" forces Claude to
+  // continue the JSON array directly — preamble text is physically impossible.
   let rawText: string;
   try {
     const msg = await anthropic.messages.create({
       model:      "claude-sonnet-4-6",
       max_tokens: 4096,
       system:
-        "You are an expert travel planner. Return ONLY valid JSON. " +
+        "You are an expert travel planner. " +
+        "Respond with a JSON array of day objects. No explanation, no markdown, no commentary — only the JSON array. " +
         "Schema: array of day objects, each with day_number (int), title (string), and items (array). " +
-        "Each item has time_slot (string like '9:00 AM'), title (string), description (string, max 30 words), " +
+        "Each item: time_slot (string like '9:00 AM'), title (string), description (string, max 30 words), " +
         "location (string), item_type (one of: activity, meal, transport, buffer). " +
         "4-6 items per day. Always include meal slots and at least one buffer block per day. " +
         "Account for member tags like 'elderly' or 'infant' by avoiding strenuous activities.",
-      messages: [{ role: "user", content: userPrompt }],
+      messages: [
+        { role: "user",      content: userPrompt },
+        { role: "assistant", content: "[" },        // prefill — forces array start
+      ],
     });
-    rawText = msg.content[0].type === "text" ? msg.content[0].text.trim() : "";
+    // Claude continues from "[", so prepend it back
+    const continuation = msg.content[0].type === "text" ? msg.content[0].text.trim() : "";
+    rawText = "[" + continuation;
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return { error: `AI error: ${message}` };
   }
 
   // ── Parse & validate ──────────────────────────────────────────────────────
+  // extractJsonArray is now a safety net only — prefill makes it unnecessary
   const jsonStr = extractJsonArray(rawText);
 
   let itinerary: z.infer<typeof ItinerarySchema>;
