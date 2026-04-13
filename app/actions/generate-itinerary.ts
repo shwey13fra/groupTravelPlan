@@ -6,21 +6,34 @@ import { anthropic }    from "@/lib/anthropic/client";
 import { refreshNudge } from "@/app/actions/refresh-nudge";
 
 // ── Zod schema for Claude response ───────────────────────────────────────────
+// Kept deliberately permissive — Claude is non-deterministic. Only enforce
+// structural shape; don't reject on item counts or string lengths.
 const ItemSchema = z.object({
-  time_slot:   z.string().min(1),
+  time_slot:   z.string(),
   title:       z.string().min(1),
-  description: z.string().max(300),
+  description: z.string(),
   location:    z.string(),
   item_type:   z.enum(["activity", "meal", "transport", "buffer"]),
 });
 
 const DaySchema = z.object({
-  day_number: z.number().int().positive(),
+  day_number: z.number().positive(),
   title:      z.string().min(1),
-  items:      z.array(ItemSchema).min(4).max(6),
+  items:      z.array(ItemSchema).min(1),
 });
 
 const ItinerarySchema = z.array(DaySchema).min(1);
+
+// ── Robust JSON-array extractor ───────────────────────────────────────────────
+// Claude sometimes prefixes the JSON with a sentence or wraps it in fences.
+// Find the first "[" and the matching last "]" to pull the array out cleanly.
+function extractJsonArray(text: string): string {
+  const stripped = text.replace(/```(?:json)?/gi, "").replace(/```/g, "").trim();
+  const start = stripped.indexOf("[");
+  const end   = stripped.lastIndexOf("]");
+  if (start !== -1 && end > start) return stripped.slice(start, end + 1);
+  return stripped; // fall through to JSON.parse which will throw a useful error
+}
 
 export async function generateItinerary(
   tripId: string
@@ -98,13 +111,14 @@ export async function generateItinerary(
   }
 
   // ── Parse & validate ──────────────────────────────────────────────────────
-  // Strip markdown code fences if Claude wraps the JSON (e.g. ```json ... ```)
-  const cleaned = rawText.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
+  const jsonStr = extractJsonArray(rawText);
 
   let itinerary: z.infer<typeof ItinerarySchema>;
   try {
-    itinerary = ItinerarySchema.parse(JSON.parse(cleaned));
-  } catch {
+    itinerary = ItinerarySchema.parse(JSON.parse(jsonStr));
+  } catch (parseErr) {
+    console.error("[generate-itinerary] parse failed:", parseErr);
+    console.error("[generate-itinerary] Claude raw (first 600 chars):", rawText.slice(0, 600));
     return { error: "AI returned an unexpected format. Please try again." };
   }
 
