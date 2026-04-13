@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 320" fill="none">
+  <!-- Terrain silhouette -->
+  <path d="M0 280 Q60 240 120 260 Q180 280 240 240 Q300 200 380 220 Q440 238 500 200 Q560 162 630 190 Q700 218 760 180 L800 170 L800 320 L0 320Z"
+        fill="#fff" fill-opacity="0.06"/>
+  <path d="M0 300 Q80 270 150 285 Q220 300 300 265 Q370 232 440 255 Q510 278 580 248 Q650 218 720 240 L800 228 L800 320 L0 320Z"
+        fill="#ea580c" fill-opacity="0.08"/>
+
+  <!-- Pine trees mid-left -->
+  <path d="M120 280 L132 238 L144 280Z" fill="#fff" fill-opacity="0.10"/>
+  <path d="M128 255 L138 222 L148 255Z" fill="#fff" fill-opacity="0.08"/>
+  <rect x="131" y="278" width="4" height="12" fill="#fff" fill-opacity="0.08" rx="1"/>
+
+  <path d="M155 280 L166 244 L177 280Z" fill="#fff" fill-opacity="0.09"/>
+  <rect x="165" y="278" width="4" height="12" fill="#fff" fill-opacity="0.07" rx="1"/>
+
+  <!-- Pine trees right -->
+  <path d="M620 285 L632 248 L644 285Z" fill="#fff" fill-opacity="0.10"/>
+  <path d="M628 258 L637 228 L646 258Z" fill="#fff" fill-opacity="0.08"/>
+  <rect x="631" y="283" width="4" height="12" fill="#fff" fill-opacity="0.08" rx="1"/>
+  <path d="M648 285 L658 252 L668 285Z" fill="#fff" fill-opacity="0.09"/>
+
+  <!-- Tent -->
+  <path d="M360 285 L400 235 L440 285Z" fill="#ea580c" fill-opacity="0.18"/>
+  <path d="M375 285 L400 250 L425 285Z" fill="#fff" fill-opacity="0.10"/>
+  <!-- Tent door -->
+  <path d="M392 285 Q400 268 408 285Z" fill="#1C2B4A" fill-opacity="0.25"/>
+  <!-- Guide line -->
+  <line x1="400" y1="235" x2="400" y2="220" stroke="#fff" stroke-opacity="0.15" stroke-width="1"/>
+  <circle cx="400" cy="219" r="2" fill="#fff" fill-opacity="0.18"/>
+
+  <!-- Compass rose (right) -->
+  <circle cx="660" cy="100" r="28" stroke="#fff" stroke-opacity="0.12" stroke-width="1.5" fill="none"/>
+  <circle cx="660" cy="100" r="4"  fill="#fff" fill-opacity="0.18"/>
+  <!-- N -->
+  <line x1="660" y1="100" x2="660" y2="75"  stroke="#fff" stroke-opacity="0.20" stroke-width="1.5"/>
+  <!-- S -->
+  <line x1="660" y1="100" x2="660" y2="125" stroke="#fff" stroke-opacity="0.14" stroke-width="1"/>
+  <!-- E -->
+  <line x1="660" y1="100" x2="685" y2="100" stroke="#fff" stroke-opacity="0.14" stroke-width="1"/>
+  <!-- W -->
+  <line x1="660" y1="100" x2="635" y2="100" stroke="#fff" stroke-opacity="0.14" stroke-width="1"/>
+  <!-- N arrow fill -->
+  <path d="M660 75 L655 90 L660 87 L665 90Z" fill="#ea580c" fill-opacity="0.35"/>
+  <text x="660" y="70" text-anchor="middle" font-size="8" fill="white" fill-opacity="0.25" font-family="sans-serif">N</text>
+
+  <!-- Path/trail dots -->
+  <circle cx="200" cy="268" r="2" fill="#fff" fill-opacity="0.18"/>
+  <circle cx="220" cy="260" r="2" fill="#fff" fill-opacity="0.14"/>
+  <circle cx="242" cy="252" r="2" fill="#fff" fill-opacity="0.12"/>
+  <circle cx="266" cy="248" r="2" fill="#fff" fill-opacity="0.10"/>
+  <circle cx="292" cy="246" r="2" fill="#fff" fill-opacity="0.10"/>
+  <circle cx="318" cy="248" r="2" fill="#fff" fill-opacity="0.10"/>
+
+  <!-- Stars -->
+  <circle cx="100" cy="50"  r="1.5" fill="#fff" fill-opacity="0.30"/>
+  <circle cx="300" cy="40"  r="1"   fill="#fff" fill-opacity="0.25"/>
+  <circle cx="500" cy="55"  r="1.5" fill="#fff" fill-opacity="0.28"/>
+  <circle cx="750" cy="40"  r="1.2" fill="#fff" fill-opacity="0.22"/>
+  <circle cx="180" cy="30"  r="1"   fill="#fff" fill-opacity="0.20"/>
+
+  <!-- Moon crescent -->
+  <circle cx="80" cy="70" r="20" fill="#fff" fill-opacity="0.08"/>
+  <circle cx="88" cy="65" r="16" fill="#1C2B4A" fill-opacity="0.55"/>
+</svg>

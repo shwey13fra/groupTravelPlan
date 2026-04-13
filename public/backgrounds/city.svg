@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 320" fill="none">
+  <!-- Far skyline (muted) -->
+  <!-- Building 1 -->
+  <rect x="30"  y="160" width="40" height="160" fill="#fff" fill-opacity="0.05"/>
+  <rect x="38"  y="150" width="24" height="15"  fill="#fff" fill-opacity="0.05"/>
+  <!-- Building 2 -->
+  <rect x="90"  y="180" width="55" height="140" fill="#fff" fill-opacity="0.05"/>
+  <!-- Building 3 tall -->
+  <rect x="160" y="100" width="35" height="220" fill="#fff" fill-opacity="0.06"/>
+  <rect x="168" y="90"  width="19" height="15"  fill="#fff" fill-opacity="0.06"/>
+  <!-- Building 4 -->
+  <rect x="210" y="150" width="50" height="170" fill="#fff" fill-opacity="0.05"/>
+  <!-- Building 5 mid -->
+  <rect x="275" y="130" width="45" height="190" fill="#fff" fill-opacity="0.06"/>
+  <!-- Antenna -->
+  <line x1="295" y1="130" x2="295" y2="100" stroke="#fff" stroke-opacity="0.08" stroke-width="2"/>
+  <circle cx="295" cy="98" r="3" fill="#fff" fill-opacity="0.10"/>
+
+  <!-- Mid skyline -->
+  <rect x="340" y="170" width="60" height="150" fill="#fff" fill-opacity="0.07"/>
+  <rect x="415" y="120" width="45" height="200" fill="#fff" fill-opacity="0.08"/>
+  <rect x="430" y="110" width="15" height="12"  fill="#fff" fill-opacity="0.08"/>
+  <line x1="437" y1="110" x2="437" y2="85"  stroke="#fff" stroke-opacity="0.10" stroke-width="2"/>
+
+  <!-- Tower (iconic) -->
+  <rect x="475" y="80"  width="30" height="240" fill="#fff" fill-opacity="0.07"/>
+  <path d="M475 80 L490 50 L505 80Z" fill="#fff" fill-opacity="0.08"/>
+  <rect x="470" y="130" width="40" height="8"   fill="#fff" fill-opacity="0.06"/>
+
+  <rect x="520" y="160" width="55" height="160" fill="#fff" fill-opacity="0.06"/>
+  <rect x="590" y="140" width="40" height="180" fill="#fff" fill-opacity="0.07"/>
+  <rect x="645" y="170" width="50" height="150" fill="#fff" fill-opacity="0.05"/>
+  <rect x="710" y="120" width="35" height="200" fill="#fff" fill-opacity="0.07"/>
+  <rect x="755" y="155" width="45" height="165" fill="#fff" fill-opacity="0.05"/>
+
+  <!-- Windows (random dots) -->
+  <rect x="170" y="115" width="4" height="4" fill="#fde68a" fill-opacity="0.20" rx="0.5"/>
+  <rect x="180" y="115" width="4" height="4" fill="#fde68a" fill-opacity="0.15" rx="0.5"/>
+  <rect x="170" y="128" width="4" height="4" fill="#fde68a" fill-opacity="0.12" rx="0.5"/>
+  <rect x="418" y="135" width="4" height="4" fill="#fde68a" fill-opacity="0.18" rx="0.5"/>
+  <rect x="428" y="135" width="4" height="4" fill="#fde68a" fill-opacity="0.14" rx="0.5"/>
+  <rect x="418" y="148" width="4" height="4" fill="#fde68a" fill-opacity="0.10" rx="0.5"/>
+  <rect x="480" y="100" width="3" height="3" fill="#fde68a" fill-opacity="0.18" rx="0.5"/>
+  <rect x="489" y="100" width="3" height="3" fill="#fde68a" fill-opacity="0.14" rx="0.5"/>
+  <rect x="714" y="135" width="4" height="4" fill="#fde68a" fill-opacity="0.16" rx="0.5"/>
+  <rect x="724" y="135" width="4" height="4" fill="#fde68a" fill-opacity="0.12" rx="0.5"/>
+
+  <!-- Ground line -->
+  <line x1="0" y1="318" x2="800" y2="318" stroke="#fff" stroke-opacity="0.08" stroke-width="1"/>
+
+  <!-- Moon -->
+  <circle cx="720" cy="45" r="18" fill="#fff" fill-opacity="0.08"/>
+  <circle cx="728" cy="40" r="14" fill="#1C2B4A" fill-opacity="0.60"/>
+</svg>

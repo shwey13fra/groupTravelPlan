@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 320" fill="none">
+  <!-- Columns left -->
+  <rect x="60"  y="160" width="12" height="160" fill="#fff" fill-opacity="0.10"/>
+  <rect x="54"  y="155" width="24" height="10"  fill="#fff" fill-opacity="0.10"/>
+  <rect x="56"  y="313" width="20" height="7"   fill="#fff" fill-opacity="0.10"/>
+
+  <rect x="90"  y="160" width="12" height="160" fill="#fff" fill-opacity="0.10"/>
+  <rect x="84"  y="155" width="24" height="10"  fill="#fff" fill-opacity="0.10"/>
+  <rect x="86"  y="313" width="20" height="7"   fill="#fff" fill-opacity="0.10"/>
+
+  <!-- Pediment (triangular roof) -->
+  <path d="M45 155 L126 155 L86 95Z" fill="#fff" fill-opacity="0.08"/>
+  <path d="M45 155 L126 155" stroke="#fff" stroke-opacity="0.12" stroke-width="1.5"/>
+
+  <!-- Columns right -->
+  <rect x="700" y="160" width="12" height="160" fill="#fff" fill-opacity="0.10"/>
+  <rect x="694" y="155" width="24" height="10"  fill="#fff" fill-opacity="0.10"/>
+  <rect x="696" y="313" width="20" height="7"   fill="#fff" fill-opacity="0.10"/>
+
+  <rect x="730" y="160" width="12" height="160" fill="#fff" fill-opacity="0.10"/>
+  <rect x="724" y="155" width="24" height="10"  fill="#fff" fill-opacity="0.10"/>
+  <rect x="726" y="313" width="20" height="7"   fill="#fff" fill-opacity="0.10"/>
+  <path d="M685 155 L756 155 L720 95Z" fill="#fff" fill-opacity="0.08"/>
+
+  <!-- Central dome structure -->
+  <!-- Steps -->
+  <rect x="270" y="295" width="260" height="8"  fill="#fff" fill-opacity="0.08"/>
+  <rect x="285" y="285" width="230" height="10" fill="#fff" fill-opacity="0.08"/>
+  <rect x="300" y="275" width="200" height="10" fill="#fff" fill-opacity="0.08"/>
+
+  <!-- Main body -->
+  <rect x="315" y="180" width="170" height="95" fill="#fff" fill-opacity="0.07"/>
+
+  <!-- Arched windows -->
+  <path d="M340 240 Q340 218 353 218 Q366 218 366 240Z" fill="#c2410c" fill-opacity="0.12"/>
+  <path d="M380 240 Q380 218 393 218 Q406 218 406 240Z" fill="#c2410c" fill-opacity="0.12"/>
+  <path d="M420 240 Q420 218 433 218 Q446 218 446 240Z" fill="#c2410c" fill-opacity="0.12"/>
+
+  <!-- Drum of dome -->
+  <rect x="350" y="145" width="100" height="35" fill="#fff" fill-opacity="0.08"/>
+
+  <!-- Dome -->
+  <path d="M345 145 Q400 75 455 145Z" fill="#fff" fill-opacity="0.10"/>
+  <path d="M355 145 Q400 85 445 145Z" fill="#fff" fill-opacity="0.06"/>
+
+  <!-- Lantern on top -->
+  <rect x="393" y="72" width="14" height="18"  fill="#fff" fill-opacity="0.10"/>
+  <path d="M391 72 L400 58 L409 72Z" fill="#fff" fill-opacity="0.10"/>
+  <line x1="400" y1="58" x2="400" y2="45" stroke="#fff" stroke-opacity="0.12" stroke-width="1.5"/>
+
+  <!-- Decorative cornice line -->
+  <line x1="315" y1="180" x2="485" y2="180" stroke="#fff" stroke-opacity="0.12" stroke-width="1"/>
+
+  <!-- Side pillars -->
+  <rect x="315" y="180" width="10" height="95" fill="#fff" fill-opacity="0.06"/>
+  <rect x="475" y="180" width="10" height="95" fill="#fff" fill-opacity="0.06"/>
+
+  <!-- Stars -->
+  <circle cx="200" cy="60"  r="1.2" fill="#fff" fill-opacity="0.30"/>
+  <circle cx="580" cy="50"  r="1.5" fill="#fff" fill-opacity="0.25"/>
+  <circle cx="640" cy="80"  r="1"   fill="#fff" fill-opacity="0.20"/>
+  <circle cx="160" cy="100" r="1"   fill="#fff" fill-opacity="0.22"/>
+</svg>

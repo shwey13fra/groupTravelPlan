@@ -1,6 +1,41 @@
 # TripSync
 
-Group trip planning — without the chaos. A portfolio prototype built with Next.js 14, Supabase, and Claude AI.
+Group travel planning without the chaos. One link replaces the WhatsApp thread, the shared Google Sheet, and the Splitwise group.
+
+Every group trip ends up the same way: destination debate in WhatsApp, itinerary in a shared doc nobody updates, tasks forgotten, expenses settled weeks later (or never). The organiser burns out managing six different tools. TripSync puts it all in one place — and gets the whole group to actually participate.
+
+## What it does
+
+| Feature | Detail |
+|---|---|
+| **AI destination suggestions** | Claude picks 3 destinations based on vibe, budget, and group type. Group votes on them. |
+| **Commitment tracking** | Each member marks "I'm in / out" with their available dates. |
+| **AI itinerary** | Once a destination is locked, Claude generates a day-by-day plan tailored to group size, tags (elderly, infant, etc.), and vibe. |
+| **Task board** | Todo → In Progress → Done, assignable to any member. |
+| **Trip vault** | Shared file cabinet: PDFs, links, notes. Can be made public for a shareable read-only view. |
+| **Expense splitter** | Log expenses with equal or custom splits. Debt simplification collapses multi-hop IOUs into at most n−1 transactions. |
+| **AI nudge** | Proactive banner that reads current trip state and suggests the next action — updates after every meaningful event via Supabase Realtime. |
+
+## Key decisions
+
+- **Joiners don't sign up.** They get a guest row in `trip_members` identified by name. Organiser gets magic-link auth only. Eliminates the biggest drop-off point in group planning tools.
+- **Assistant prefill for JSON.** All Claude calls seed the assistant turn with `[` so it's structurally impossible to get preamble text before the JSON array — no regex extraction needed.
+- **Separate `last_nudge_at` vs `last_ai_call_at`.** Itinerary/destination generation doesn't block nudge updates — they're different rate-limit clocks.
+- **CSS variable theming.** `--vibe-accent` is set on the layout root div, cascades into tab nav and accent elements without prop drilling.
+
+## Phases shipped
+
+| Phase | Feature |
+|---|---|
+| 1 | Auth + trip creation |
+| 2 | Join flow + member list |
+| 3 | Destination voting + AI suggestions |
+| 4 | Commitment tracking |
+| 5 | AI itinerary generation |
+| 6 | Expense splitter + debt simplification |
+| 7 | Trip vault (PDF, link, note) + public view |
+| 8 | Proactive AI nudge with Realtime |
+| 9 | Visual polish — vibe theming, SVG backgrounds, animations |
 
 ---
 

@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import ShareButton  from "@/components/trip/ShareButton";
 import TripTabNav   from "@/components/trip/TripTabNav";
 import { signOut }  from "@/app/actions/sign-out";
+import { getVibeAccent } from "@/lib/theme";
 
 const VIBE_LABELS: Record<string, string> = {
   beach:     "Beach",
@@ -52,11 +53,23 @@ export default async function TripLayout({
     .filter(Boolean)
     .join(" · ");
 
+  const vibeAccent = getVibeAccent(trip.vibe);
+  const vibeBg     = trip.vibe ? `/backgrounds/${trip.vibe}.svg` : null;
+
   return (
-    <div className="min-h-screen bg-[#FAF8F5]">
+    <div className="min-h-screen bg-[#FAF8F5]" style={{ "--vibe-accent": vibeAccent } as React.CSSProperties}>
       {/* ── Dark hero ──────────────────────────────────────────────────────── */}
-      <div className="bg-gradient-to-b from-[#1C2B4A] to-[#243558] px-6 pt-8 pb-8">
-        <div className="mx-auto w-full max-w-2xl space-y-3">
+      <div className="relative overflow-hidden bg-gradient-to-b from-[#1C2B4A] to-[#243558] px-6 pt-8 pb-8">
+        {/* Vibe background illustration */}
+        {vibeBg && (
+          <img
+            src={vibeBg}
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover object-bottom opacity-100 select-none"
+          />
+        )}
+        <div className="relative z-10 mx-auto w-full max-w-2xl space-y-3">
 
           {/* Organizer top bar — only for authenticated users */}
           {session && (

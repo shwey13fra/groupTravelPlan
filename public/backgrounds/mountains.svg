@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 320" fill="none">
+  <!-- Back range (muted) -->
+  <path d="M0 240 L80 120 L160 200 L260 80 L360 180 L440 100 L520 190 L620 60 L700 160 L800 110 L800 320 L0 320Z"
+        fill="#fff" fill-opacity="0.05"/>
+
+  <!-- Snow caps on back range -->
+  <path d="M260 80 L230 135 L290 135Z" fill="#fff" fill-opacity="0.12"/>
+  <path d="M620 60 L590 115 L650 115Z" fill="#fff" fill-opacity="0.12"/>
+  <path d="M440 100 L420 135 L460 135Z" fill="#fff" fill-opacity="0.08"/>
+
+  <!-- Mid range -->
+  <path d="M0 270 L120 160 L200 230 L310 110 L410 200 L500 130 L600 210 L680 140 L800 190 L800 320 L0 320Z"
+        fill="#fff" fill-opacity="0.07"/>
+
+  <!-- Snow caps mid -->
+  <path d="M310 110 L280 160 L340 160Z" fill="#fff" fill-opacity="0.14"/>
+  <path d="M500 130 L478 168 L522 168Z" fill="#fff" fill-opacity="0.11"/>
+
+  <!-- Front ridge -->
+  <path d="M0 290 L100 220 L180 270 L280 200 L380 260 L480 195 L570 255 L660 205 L750 250 L800 225 L800 320 L0 320Z"
+        fill="#16a34a" fill-opacity="0.10"/>
+
+  <!-- Pine trees silhouette -->
+  <!-- Group left -->
+  <path d="M50 290 L60 240 L70 290Z" fill="#fff" fill-opacity="0.08"/>
+  <path d="M70 290 L82 244 L94 290Z" fill="#fff" fill-opacity="0.08"/>
+  <path d="M90 290 L100 250 L110 290Z" fill="#fff" fill-opacity="0.06"/>
+  <!-- Group right -->
+  <path d="M680 290 L690 250 L700 290Z" fill="#fff" fill-opacity="0.08"/>
+  <path d="M700 290 L712 244 L724 290Z" fill="#fff" fill-opacity="0.08"/>
+  <path d="M720 290 L730 252 L740 290Z" fill="#fff" fill-opacity="0.06"/>
+
+  <!-- Stars/sparkles -->
+  <circle cx="150" cy="50" r="1.5" fill="#fff" fill-opacity="0.30"/>
+  <circle cx="400" cy="30" r="1" fill="#fff" fill-opacity="0.25"/>
+  <circle cx="650" cy="45" r="1.5" fill="#fff" fill-opacity="0.28"/>
+  <circle cx="250" cy="20" r="1" fill="#fff" fill-opacity="0.20"/>
+  <circle cx="550" cy="25" r="1.2" fill="#fff" fill-opacity="0.22"/>
+</svg>

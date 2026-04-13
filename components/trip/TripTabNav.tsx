@@ -31,7 +31,7 @@ export default function TripTabNav({ tripId }: { tripId: string }) {
               className={cn(
                 "shrink-0 px-3 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap",
                 isActive
-                  ? "border-[#1C2B4A] text-[#1C2B4A]"
+                  ? "border-[var(--vibe-accent,#1C2B4A)] text-[var(--vibe-accent,#1C2B4A)]"
                   : "border-transparent text-muted-foreground hover:text-foreground hover:border-[#E8E4DE]"
               )}
             >

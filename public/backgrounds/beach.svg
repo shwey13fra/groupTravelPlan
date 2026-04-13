@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 320" fill="none">
+  <!-- Sky gradient hint -->
+  <defs>
+    <radialGradient id="sun" cx="70%" cy="30%" r="15%">
+      <stop offset="0%" stop-color="#fde68a" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#fde68a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Sun glow -->
+  <circle cx="560" cy="80" r="80" fill="url(#sun)"/>
+  <!-- Sun disk -->
+  <circle cx="560" cy="80" r="28" fill="#fde68a" fill-opacity="0.35"/>
+
+  <!-- Distant waves -->
+  <path d="M0 200 Q100 185 200 200 Q300 215 400 200 Q500 185 600 200 Q700 215 800 200 L800 230 Q700 245 600 230 Q500 215 400 230 Q300 245 200 230 Q100 215 0 230Z" fill="#2dd4bf" fill-opacity="0.12"/>
+  <path d="M0 220 Q120 205 240 220 Q360 235 480 220 Q600 205 720 220 L800 220 L800 250 Q700 265 600 250 Q480 235 360 250 Q240 265 120 250 L0 250Z" fill="#2dd4bf" fill-opacity="0.10"/>
+
+  <!-- Main wave -->
+  <path d="M0 260 Q80 240 160 260 Q240 280 320 260 Q400 240 480 260 Q560 280 640 260 Q720 240 800 260 L800 320 L0 320Z" fill="#2dd4bf" fill-opacity="0.18"/>
+
+  <!-- Palm tree left -->
+  <rect x="65" y="130" width="7" height="100" rx="3" fill="#fff" fill-opacity="0.15"/>
+  <path d="M68 140 Q20 100 10 70 Q30 80 50 100 Q60 110 68 130Z" fill="#fff" fill-opacity="0.12"/>
+  <path d="M68 140 Q110 95 130 65 Q115 78 100 98 Q88 112 72 132Z" fill="#fff" fill-opacity="0.12"/>
+  <path d="M68 140 Q30 155 5 160 Q20 145 45 140 Q58 137 68 140Z" fill="#fff" fill-opacity="0.10"/>
+
+  <!-- Palm tree right (smaller) -->
+  <rect x="718" y="155" width="5" height="80" rx="2" fill="#fff" fill-opacity="0.12"/>
+  <path d="M720 163 Q690 133 678 110 Q693 120 705 138 Q712 148 720 161Z" fill="#fff" fill-opacity="0.10"/>
+  <path d="M720 163 Q750 130 762 108 Q750 120 738 138 Q730 150 722 163Z" fill="#fff" fill-opacity="0.10"/>
+
+  <!-- Seagulls -->
+  <path d="M300 90 Q310 82 320 90" stroke="#fff" stroke-opacity="0.25" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M340 75 Q352 66 364 75" stroke="#fff" stroke-opacity="0.20" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M260 110 Q268 104 276 110" stroke="#fff" stroke-opacity="0.18" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+
+  <!-- Horizon shimmer -->
+  <line x1="0" y1="198" x2="800" y2="198" stroke="#2dd4bf" stroke-opacity="0.15" stroke-width="1"/>
+</svg>

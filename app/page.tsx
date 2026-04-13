@@ -41,6 +41,21 @@ export default async function Home() {
           Plan trips together, without the chaos
         </p>
 
+        <ul className="flex flex-col gap-2 text-sm text-white/40 w-full">
+          <li className="flex items-center gap-2.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-400/60 shrink-0" />
+            AI destination picks &amp; day-by-day itinerary
+          </li>
+          <li className="flex items-center gap-2.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-400/60 shrink-0" />
+            Group votes, commitments &amp; task tracker
+          </li>
+          <li className="flex items-center gap-2.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-400/60 shrink-0" />
+            Shared vault, expenses &amp; fair-split calculator
+          </li>
+        </ul>
+
         <div className="flex flex-col gap-3 w-full mt-2">
           {/* Authenticated organizer */}
           {user && (
