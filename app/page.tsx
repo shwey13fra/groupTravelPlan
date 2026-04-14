@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FlightAnimation } from "@/components/trip/FlightAnimation";
 import { createClient } from "@/lib/supabase/server";
+import InfoButton from "@/components/InfoButton";
 
 export default async function Home() {
   const supabase = await createClient();
@@ -39,6 +40,7 @@ export default async function Home() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_100%,rgba(139,92,246,0.08)_0%,transparent_70%)]" />
 
       <FlightAnimation />
+      <InfoButton />
 
       <div className="relative z-10 flex flex-col items-center gap-5 text-center max-w-sm animate-fade-up">
 
@@ -58,23 +60,6 @@ export default async function Home() {
         <p className="max-w-[260px] text-base leading-relaxed text-white/45">
           Plan trips together, without the chaos
         </p>
-
-        {/* Feature cards */}
-        <ul className="flex w-full flex-col gap-2 text-sm">
-          {[
-            { icon: "✨", text: "AI destination picks & day-by-day itinerary" },
-            { icon: "🗳️", text: "Group votes, commitments & task tracker" },
-            { icon: "💸", text: "Shared vault, expenses & fair-split calculator" },
-          ].map(({ icon, text }) => (
-            <li
-              key={text}
-              className="flex items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.04] px-4 py-3 text-left text-white/50"
-            >
-              <span className="shrink-0 text-base leading-none">{icon}</span>
-              <span>{text}</span>
-            </li>
-          ))}
-        </ul>
 
         <div className="mt-1 flex w-full flex-col gap-3">
           {/* Authenticated organiser */}
