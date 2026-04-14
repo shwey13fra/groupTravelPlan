@@ -34,9 +34,8 @@ export async function joinTrip(
 
   const cookieStore = await cookies();
 
-  // Check if a member with this name already exists in the trip (reclaim flow).
-  // This lets an existing member re-establish their cookie identity without
-  // creating a duplicate row.
+  // Block if this name is already taken in the trip — prevents impersonation.
+  // Each member must have a unique name within a trip.
   const { data: existing } = await supabase
     .from("trip_members")
     .select("id")
@@ -44,28 +43,27 @@ export async function joinTrip(
     .ilike("name", name.trim())
     .maybeSingle();
 
-  let memberId: string;
-
   if (existing) {
-    // Reclaim: set cookie to existing member, no new row
-    memberId = existing.id;
-  } else {
-    // New member
-    const { data: member, error } = await supabase
-      .from("trip_members")
-      .insert({
-        trip_id:           tripId,
-        name,
-        emoji,
-        is_organizer:      false,
-        commitment_status: "pending",
-      })
-      .select("id")
-      .single();
-
-    if (error || !member) return { error: "Failed to join trip. Please try again." };
-    memberId = member.id;
+    return {
+      error: `"${name.trim()}" is already taken in this trip. Choose a different name.`,
+    };
   }
+
+  // New member
+  const { data: member, error } = await supabase
+    .from("trip_members")
+    .insert({
+      trip_id:           tripId,
+      name:              name.trim(),
+      emoji,
+      is_organizer:      false,
+      commitment_status: "pending",
+    })
+    .select("id")
+    .single();
+
+  if (error || !member) return { error: "Failed to join trip. Please try again." };
+  const memberId = member.id;
 
   // Set member identity cookie (scoped to this trip)
   cookieStore.set(`tmid_${tripId}`, memberId, {

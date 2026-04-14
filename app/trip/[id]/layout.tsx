@@ -118,13 +118,14 @@ export default async function TripLayout({
         </div>
       </div>
 
-      {/* ── Sticky tab nav ─────────────────────────────────────────────────── */}
+      {/* ── Tab nav: sticky top on desktop, fixed bottom on mobile ────────── */}
       <div className="sticky top-0 z-10 shadow-sm">
         <TripTabNav tripId={trip.id} />
       </div>
 
       {/* ── Page content ───────────────────────────────────────────────────── */}
-      <div className="mx-auto max-w-2xl px-6 py-8">
+      {/* pb-24 on mobile gives clearance above the fixed bottom tab bar */}
+      <div className="mx-auto max-w-2xl px-6 py-8 pb-24 sm:pb-8">
         {children}
       </div>
     </div>
