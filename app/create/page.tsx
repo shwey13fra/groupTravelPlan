@@ -102,6 +102,7 @@ export default function CreatePage() {
     trigger,
     watch,
     setValue,
+    getValues,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -117,9 +118,8 @@ export default function CreatePage() {
 
   // Pre-fill end date with start date when start is chosen and end is still empty
   useEffect(() => {
-    if (startDateValue) {
-      const current = watch("endDate");
-      if (!current) setValue("endDate", startDateValue, { shouldValidate: false });
+    if (startDateValue && !getValues("endDate")) {
+      setValue("endDate", startDateValue, { shouldValidate: false });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startDateValue]);
