@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -100,6 +100,8 @@ export default function CreatePage() {
     control,
     handleSubmit,
     trigger,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -110,6 +112,17 @@ export default function CreatePage() {
     },
     mode: "onBlur",
   });
+
+  const startDateValue = watch("startDate");
+
+  // Pre-fill end date with start date when start is chosen and end is still empty
+  useEffect(() => {
+    if (startDateValue) {
+      const current = watch("endDate");
+      if (!current) setValue("endDate", startDateValue, { shouldValidate: false });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startDateValue]);
 
   async function handleNext() {
     const valid = await trigger(STEP_FIELDS[step]);
@@ -369,6 +382,7 @@ export default function CreatePage() {
                     <Input
                       id="endDate"
                       type="date"
+                      min={startDateValue || undefined}
                       {...register("endDate")}
                     />
                   </div>
