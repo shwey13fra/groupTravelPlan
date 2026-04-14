@@ -13,7 +13,6 @@ export default async function Home() {
     cookies(),
   ]);
 
-  // Last trip cookie fallback (for non-auth joiners)
   const lastTripId = !user ? (cookieStore.get("last_trip_id")?.value ?? null) : null;
 
   let lastTripName: string | null = null;
@@ -27,46 +26,67 @@ export default async function Home() {
   }
 
   return (
-    <main className="relative min-h-screen bg-[#1C2B4A] flex flex-col items-center justify-center px-6 overflow-hidden">
+    <main
+      className="relative min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden"
+      style={{
+        background:
+          "radial-gradient(ellipse at 30% 40%, #1e1b4b 0%, #0f172a 50%, #020617 100%)",
+      }}
+    >
+      {/* Decorative ambient orbs */}
+      <div className="animate-float-slow pointer-events-none absolute top-0 left-0 h-[520px] w-[520px] -translate-x-1/2 -translate-y-1/3 rounded-full bg-indigo-600/[0.18] blur-[130px]" />
+      <div className="animate-float-slow-r pointer-events-none absolute bottom-0 right-0 h-[440px] w-[440px] translate-x-1/3 translate-y-1/3 rounded-full bg-cyan-500/[0.13] blur-[110px]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_100%,rgba(139,92,246,0.08)_0%,transparent_70%)]" />
+
       <FlightAnimation />
 
-      <div className="relative z-10 flex flex-col items-center gap-5 text-center max-w-sm">
-        <p className="text-white/40 text-xs uppercase tracking-[0.25em] font-medium">
-          Group travel, simplified
-        </p>
-        <h1 className="font-display text-7xl sm:text-8xl text-[#FAF8F5] tracking-tight leading-none">
+      <div className="relative z-10 flex flex-col items-center gap-5 text-center max-w-sm animate-fade-up">
+
+        {/* Pill badge */}
+        <div className="flex items-center gap-2 rounded-full border border-white/[0.12] bg-white/[0.06] px-3.5 py-1.5 backdrop-blur-sm">
+          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
+          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-white/55">
+            Group travel, simplified
+          </p>
+        </div>
+
+        {/* Hero headline — gradient text */}
+        <h1 className="gradient-text-hero font-display text-7xl leading-none sm:text-8xl">
           TripSync
         </h1>
-        <p className="text-white/50 text-base leading-relaxed">
+
+        <p className="max-w-[260px] text-base leading-relaxed text-white/45">
           Plan trips together, without the chaos
         </p>
 
-        <ul className="flex flex-col gap-2 text-sm text-white/40 w-full">
-          <li className="flex items-center gap-2.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-amber-400/60 shrink-0" />
-            AI destination picks &amp; day-by-day itinerary
-          </li>
-          <li className="flex items-center gap-2.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-amber-400/60 shrink-0" />
-            Group votes, commitments &amp; task tracker
-          </li>
-          <li className="flex items-center gap-2.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-amber-400/60 shrink-0" />
-            Shared vault, expenses &amp; fair-split calculator
-          </li>
+        {/* Feature cards */}
+        <ul className="flex w-full flex-col gap-2 text-sm">
+          {[
+            { icon: "✨", text: "AI destination picks & day-by-day itinerary" },
+            { icon: "🗳️", text: "Group votes, commitments & task tracker" },
+            { icon: "💸", text: "Shared vault, expenses & fair-split calculator" },
+          ].map(({ icon, text }) => (
+            <li
+              key={text}
+              className="flex items-center gap-3 rounded-xl border border-white/[0.07] bg-white/[0.04] px-4 py-3 text-left text-white/50"
+            >
+              <span className="shrink-0 text-base leading-none">{icon}</span>
+              <span>{text}</span>
+            </li>
+          ))}
         </ul>
 
-        <div className="flex flex-col gap-3 w-full mt-2">
-          {/* Authenticated organizer */}
+        <div className="mt-1 flex w-full flex-col gap-3">
+          {/* Authenticated organiser */}
           {user && (
             <Button
               asChild
               size="lg"
-              className="w-full min-h-[44px] bg-white/10 hover:bg-white/20 text-white border border-white/20 gap-2 transition-all duration-200"
+              className="w-full min-h-[44px] gap-2 border border-white/[0.12] bg-white/[0.07] text-white backdrop-blur-sm transition-all duration-200 hover:bg-white/[0.12]"
             >
               <Link href="/my-trips">
                 My trips
-                <ArrowRight className="h-4 w-4 ml-auto" />
+                <ArrowRight className="ml-auto h-4 w-4" />
               </Link>
             </Button>
           )}
@@ -76,20 +96,23 @@ export default async function Home() {
             <Button
               asChild
               size="lg"
-              className="w-full min-h-[44px] bg-white/10 hover:bg-white/20 text-white border border-white/20 gap-2 transition-all duration-200"
+              className="w-full min-h-[44px] gap-2 border border-white/[0.12] bg-white/[0.07] text-white backdrop-blur-sm transition-all duration-200 hover:bg-white/[0.12]"
             >
               <Link href={`/trip/${lastTripId}`}>
                 Continue planning
-                <span className="font-display text-lg leading-none mx-1">{lastTripName}</span>
-                <ArrowRight className="h-4 w-4 ml-auto" />
+                <span className="mx-1 font-display text-lg leading-none">
+                  {lastTripName}
+                </span>
+                <ArrowRight className="ml-auto h-4 w-4" />
               </Link>
             </Button>
           )}
 
+          {/* Primary CTA */}
           <Button
             asChild
             size="lg"
-            className="w-full min-h-[44px] bg-amber-500 hover:bg-amber-400 text-white border-0 shadow-lg shadow-amber-900/30 transition-all duration-200 hover:scale-105 active:scale-95"
+            className="w-full min-h-[44px] border-0 bg-gradient-to-r from-amber-500 to-orange-500 font-medium text-white shadow-lg shadow-orange-950/40 transition-all duration-300 hover:from-amber-400 hover:to-orange-400 hover:scale-[1.02] hover:shadow-orange-950/60 active:scale-95"
           >
             <Link href="/create">Create a trip</Link>
           </Button>

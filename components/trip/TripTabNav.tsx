@@ -16,7 +16,7 @@ export default function TripTabNav({ tripId }: { tripId: string }) {
   const pathname = usePathname();
 
   return (
-    <nav className="flex overflow-x-auto scrollbar-hide border-b border-[#E8E4DE] bg-white">
+    <nav className="glass-nav flex overflow-x-auto scrollbar-hide">
       <div className="flex min-w-max px-4 sm:px-6 mx-auto w-full max-w-2xl">
         {TABS.map((tab) => {
           const href     = `/trip/${tripId}${tab.path}`;

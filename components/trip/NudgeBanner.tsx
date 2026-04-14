@@ -59,13 +59,16 @@ export default function NudgeBanner({ tripId, initialNudge }: Props) {
   }
 
   return (
-    <div className="relative rounded-xl bg-amber-50 border border-amber-100 px-4 py-3.5">
+    <div className="relative rounded-xl overflow-hidden border border-violet-200/70 bg-gradient-to-br from-violet-50 via-indigo-50 to-purple-50 px-4 py-3.5">
+      {/* Subtle inner glow */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(139,92,246,0.08)_0%,transparent_60%)]" />
+
       {/* Label row */}
-      <div className="flex items-center justify-between mb-1.5">
+      <div className="relative flex items-center justify-between mb-1.5">
         <div className="flex items-center gap-1.5">
-          <Sparkles className="h-3 w-3 text-amber-500 shrink-0" />
-          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-amber-600">
-            Trip guide
+          <Sparkles className="h-3 w-3 text-violet-500 shrink-0" />
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-violet-600">
+            AI Trip Guide
           </span>
         </div>
         <button
@@ -73,7 +76,7 @@ export default function NudgeBanner({ tripId, initialNudge }: Props) {
           disabled={loading}
           aria-label="Refresh suggestion"
           className={cn(
-            "flex items-center gap-1 text-[11px] text-amber-500 hover:text-amber-700 transition-colors",
+            "flex items-center gap-1 text-[11px] text-violet-400 hover:text-violet-600 transition-colors",
             loading && "opacity-50 cursor-not-allowed",
           )}
         >
@@ -83,7 +86,7 @@ export default function NudgeBanner({ tripId, initialNudge }: Props) {
       </div>
 
       {/* Nudge text */}
-      <p className="text-sm text-foreground/80 leading-relaxed">
+      <p className="relative text-sm text-foreground/75 leading-relaxed">
         {nudge ?? FALLBACK}
       </p>
     </div>

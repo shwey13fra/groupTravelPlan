@@ -4,6 +4,7 @@ import { Plus, ArrowRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/app/actions/sign-out";
+import { getVibeAccent } from "@/lib/theme";
 
 const VIBE_EMOJI: Record<string, string> = {
   beach:     "🏖️",
@@ -58,22 +59,30 @@ export default async function MyTripsPage() {
   return (
     <main className="min-h-screen bg-[#FAF8F5]">
 
-      {/* Dark hero */}
-      <div className="bg-gradient-to-b from-[#1C2B4A] to-[#243558] px-6 pt-14 pb-10">
-        <div className="mx-auto max-w-2xl flex items-end justify-between">
+      {/* Immersive hero */}
+      <div
+        className="relative overflow-hidden px-6 pt-14 pb-10"
+        style={{
+          background:
+            "linear-gradient(160deg, #0f172a 0%, #1e2d4a 50%, #0a1628 100%)",
+        }}
+      >
+        {/* Subtle ambient orb */}
+        <div className="pointer-events-none absolute top-0 right-0 h-80 w-80 translate-x-1/3 -translate-y-1/3 rounded-full bg-indigo-600/[0.15] blur-[90px]" />
+        <div className="relative mx-auto max-w-2xl flex items-end justify-between">
           <div className="space-y-2">
-            <a href="/" className="font-display text-xl text-white/50 hover:text-white transition-colors block">
+            <a href="/" className="font-display text-xl text-white/40 hover:text-white/80 transition-colors block">
               TripSync
             </a>
             <h1 className="font-display text-5xl sm:text-6xl text-[#FAF8F5] leading-tight">
               Your trips
             </h1>
-            <p className="text-white/45 text-sm">{user.email}</p>
+            <p className="text-white/40 text-sm">{user.email}</p>
           </div>
           <form action={signOut}>
             <button
               type="submit"
-              className="text-xs text-white/40 hover:text-white/70 transition-colors underline underline-offset-2"
+              className="text-xs text-white/35 hover:text-white/65 transition-colors underline underline-offset-2"
             >
               Sign out
             </button>
@@ -110,13 +119,15 @@ export default async function MyTripsPage() {
                 memberCount > 0 ? `${memberCount} member${memberCount !== 1 ? "s" : ""}` : null,
               ].filter(Boolean);
 
+              const accent = getVibeAccent(trip.vibe);
               return (
                 <Link
                   key={trip.id}
                   href={`/trip/${trip.id}`}
-                  className="flex items-center justify-between rounded-xl border border-[#E8E4DE] bg-white px-5 py-4 shadow-sm hover:shadow-md hover:border-[#C8C4BC] transition-all group"
+                  className="flex items-center justify-between rounded-xl border border-[#E8E4DE] bg-white overflow-hidden shadow-sm hover:shadow-md hover:border-[#C8C4BC] transition-all group"
+                  style={{ borderLeftColor: accent, borderLeftWidth: "3px" }}
                 >
-                  <div className="space-y-1.5 min-w-0">
+                  <div className="space-y-1.5 min-w-0 px-5 py-4">
                     <div className="flex items-center gap-2">
                       {trip.vibe && (
                         <span className="text-lg">{VIBE_EMOJI[trip.vibe] ?? "✈️"}</span>
@@ -133,17 +144,17 @@ export default async function MyTripsPage() {
                     {/* Status badge */}
                     <div>
                       {trip.destination_locked ? (
-                        <span className="inline-block text-[10px] font-medium bg-emerald-50 text-emerald-600 rounded-full px-2 py-0.5">
+                        <span className="inline-block text-[10px] font-medium bg-emerald-50 text-emerald-700 rounded-full px-2.5 py-0.5 border border-emerald-100">
                           Destination locked ✓
                         </span>
                       ) : (
-                        <span className="inline-block text-[10px] font-medium bg-[#F4F1EC] text-muted-foreground rounded-full px-2 py-0.5">
+                        <span className="inline-block text-[10px] font-medium bg-[#F4F1EC] text-muted-foreground rounded-full px-2.5 py-0.5">
                           Planning
                         </span>
                       )}
                     </div>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground shrink-0 transition-colors ml-4" />
+                  <ArrowRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-muted-foreground shrink-0 transition-all group-hover:translate-x-0.5 mr-5" />
                 </Link>
               );
             })}

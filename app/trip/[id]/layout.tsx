@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import ShareButton  from "@/components/trip/ShareButton";
 import TripTabNav   from "@/components/trip/TripTabNav";
 import { signOut }  from "@/app/actions/sign-out";
-import { getVibeAccent } from "@/lib/theme";
+import { getVibeAccent, getVibeHeroGradient } from "@/lib/theme";
 
 const VIBE_LABELS: Record<string, string> = {
   beach:     "Beach",
@@ -53,13 +53,17 @@ export default async function TripLayout({
     .filter(Boolean)
     .join(" · ");
 
-  const vibeAccent = getVibeAccent(trip.vibe);
-  const vibeBg     = trip.vibe ? `/backgrounds/${trip.vibe}.svg` : null;
+  const vibeAccent   = getVibeAccent(trip.vibe);
+  const vibeGradient = getVibeHeroGradient(trip.vibe);
+  const vibeBg       = trip.vibe ? `/backgrounds/${trip.vibe}.svg` : null;
 
   return (
     <div className="min-h-screen bg-[#FAF8F5]" style={{ "--vibe-accent": vibeAccent } as React.CSSProperties}>
-      {/* ── Dark hero ──────────────────────────────────────────────────────── */}
-      <div className="relative overflow-hidden bg-gradient-to-b from-[#1C2B4A] to-[#243558] px-6 pt-8 pb-8">
+      {/* ── Immersive vibe hero ────────────────────────────────────────────── */}
+      <div
+        className="relative overflow-hidden px-6 pt-8 pb-8"
+        style={{ background: vibeGradient }}
+      >
         {/* Vibe background illustration */}
         {vibeBg && (
           <img
@@ -96,11 +100,14 @@ export default async function TripLayout({
               {metaLine}
             </p>
           )}
-          <h1 className="font-display text-6xl sm:text-7xl text-[#FAF8F5] leading-tight">
+          <h1
+            className="font-display text-6xl sm:text-7xl text-[#FAF8F5] leading-tight"
+            style={{ textShadow: `0 0 50px ${vibeAccent}50` }}
+          >
             {trip.name}
           </h1>
           {trip.destination && (
-            <p className="text-white/60 text-base">{trip.destination}</p>
+            <p className="text-white/55 text-base font-medium tracking-wide">{trip.destination}</p>
           )}
           <div className="pt-2 flex justify-center sm:block">
             <ShareButton

@@ -88,3 +88,32 @@ button:active:not([disabled]),
 a[role="button"]:active {
   transform: scale(0.97);
 }
+
+/* ── Landing hero — gradient headline ────────────────────────────────────── */
+.gradient-text-hero {
+  background: linear-gradient(150deg, #f8fafc 0%, #c7d2fe 55%, #67e8f9 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 40px rgba(99, 102, 241, 0.35));
+}
+
+/* ── Floating orb animations (landing page decorations) ──────────────────── */
+@keyframes float-slow {
+  0%, 100% { transform: translate(0, 0) scale(1);         }
+  50%       { transform: translate(-12px, -20px) scale(1.04); }
+}
+@keyframes float-slow-r {
+  0%, 100% { transform: translate(0, 0) scale(1);          }
+  50%       { transform: translate(14px, -16px) scale(1.03); }
+}
+.animate-float-slow   { animation: float-slow   9s ease-in-out infinite; }
+.animate-float-slow-r { animation: float-slow-r 11s ease-in-out infinite; }
+
+/* ── Glass nav surface ────────────────────────────────────────────────────── */
+.glass-nav {
+  background: rgba(250, 248, 245, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(214, 209, 200, 0.55);
+}

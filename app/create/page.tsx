@@ -23,11 +23,11 @@ const EMOJIS = [
 ] as const;
 
 const VIBES = [
-  { value: "beach",     emoji: "🏖️", label: "Beach" },
-  { value: "mountains", emoji: "⛰️", label: "Mountains" },
-  { value: "city",      emoji: "🏙️", label: "City" },
-  { value: "heritage",  emoji: "🏛️", label: "Heritage" },
-  { value: "adventure", emoji: "🎒", label: "Adventure" },
+  { value: "beach",     emoji: "🏖️", label: "Beach",     accent: "#06b6d4" },
+  { value: "mountains", emoji: "⛰️", label: "Mountains", accent: "#6366f1" },
+  { value: "city",      emoji: "🏙️", label: "City",      accent: "#a855f7" },
+  { value: "heritage",  emoji: "🏛️", label: "Heritage",  accent: "#d97706" },
+  { value: "adventure", emoji: "🎒", label: "Adventure",  accent: "#f97316" },
 ] as const;
 
 const GROUP_TYPES = [
@@ -142,8 +142,13 @@ export default function CreatePage() {
     <main className="min-h-screen bg-[#FAF8F5]">
 
       {/* Branded header */}
-      <div className="bg-[#1C2B4A] px-6 py-4">
-        <a href="/" className="font-display text-2xl text-[#FAF8F5]/80 hover:text-[#FAF8F5] transition-colors">
+      <div
+        className="px-6 py-4"
+        style={{
+          background: "linear-gradient(160deg, #0f172a 0%, #1e2d4a 100%)",
+        }}
+      >
+        <a href="/" className="font-display text-2xl text-[#FAF8F5]/60 hover:text-[#FAF8F5] transition-colors">
           TripSync
         </a>
       </div>
@@ -173,8 +178,12 @@ export default function CreatePage() {
               <div
                 key={s}
                 className={cn(
-                  "h-0.5 flex-1 rounded-full transition-all duration-300",
-                  s <= step ? "bg-[#1C2B4A]" : "bg-border"
+                  "h-1 flex-1 rounded-full transition-all duration-500",
+                  s < step
+                    ? "bg-emerald-500"
+                    : s === step
+                    ? "bg-[#1C2B4A]"
+                    : "bg-border"
                 )}
               />
             ))}
@@ -390,7 +399,7 @@ export default function CreatePage() {
                   control={control}
                   render={({ field }) => (
                     <div className="flex flex-col gap-2">
-                      {VIBES.map(({ value, emoji, label }) => (
+                      {VIBES.map(({ value, emoji, label, accent }) => (
                         <button
                           key={value}
                           type="button"
@@ -398,12 +407,25 @@ export default function CreatePage() {
                           className={cn(
                             "flex items-center gap-3 px-4 rounded-xl border-2 text-left transition-all min-h-[52px]",
                             field.value === value
-                              ? "border-foreground bg-foreground/5"
-                              : "border-border hover:border-foreground/30"
+                              ? "border-transparent"
+                              : "border-border hover:border-foreground/20"
                           )}
+                          style={
+                            field.value === value
+                              ? { borderColor: accent, background: `${accent}12` }
+                              : undefined
+                          }
                         >
                           <span className="text-2xl">{emoji}</span>
                           <span className="font-medium text-foreground">{label}</span>
+                          {field.value === value && (
+                            <span
+                              className="ml-auto text-xs font-semibold"
+                              style={{ color: accent }}
+                            >
+                              ✓
+                            </span>
+                          )}
                         </button>
                       ))}
                     </div>
