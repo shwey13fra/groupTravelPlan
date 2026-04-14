@@ -74,6 +74,9 @@ function simplifyDebts(
 interface Props {
   tripId:          string;
   currency:        string;
+  budgetMin:       number | null;
+  budgetMax:       number | null;
+  groupSize:       number;
   currentMemberId: string | null;
   members:         TripMember[];
   initialExpenses: Expense[];
@@ -91,7 +94,8 @@ const emptyDialog = {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function ExpenseSection({
-  tripId, currency, currentMemberId, members, initialExpenses, initialSplits,
+  tripId, currency, budgetMin, budgetMax, groupSize,
+  currentMemberId, members, initialExpenses, initialSplits,
 }: Props) {
   const sym   = SYM[currency] ?? currency;
   const [tab,      setTab]      = useState<"expenses" | "balances">("expenses");
@@ -155,6 +159,27 @@ export default function ExpenseSection({
     return acc;
   }, {});
 
+  // ── Summary calculations ─────────────────────────────────────────────────
+  const totalSpend = expenses.reduce((s, e) => s + Number(e.amount), 0);
+  const perPersonAvg = members.length > 0 ? totalSpend / members.length : 0;
+  const budgetCeiling = budgetMax ? budgetMax * groupSize : null;
+  const budgetProgress = budgetCeiling ? Math.min((totalSpend / budgetCeiling) * 100, 100) : null;
+
+  // Per-member: how much each person has paid out
+  const paidByMember: Record<string, number> = {};
+  for (const e of expenses) {
+    paidByMember[e.paid_by] = (paidByMember[e.paid_by] ?? 0) + Number(e.amount);
+  }
+
+  // Current member's snapshot
+  const myPaid = currentMemberId ? (paidByMember[currentMemberId] ?? 0) : 0;
+  const myOwed = currentMemberId
+    ? debtTxns.filter((t) => t.fromId === currentMemberId).reduce((s, t) => s + t.amount, 0)
+    : 0;
+  const myToReceive = currentMemberId
+    ? debtTxns.filter((t) => t.toId === currentMemberId).reduce((s, t) => s + t.amount, 0)
+    : 0;
+
   // ── Dialog helpers ────────────────────────────────────────────────────────
   function openDialog() {
     setForm({ ...emptyDialog, paidBy: currentMemberId ?? members[0]?.id ?? "" });
@@ -213,6 +238,99 @@ export default function ExpenseSection({
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <>
+      {/* ── Trip spend summary ──────────────────────────────────────────── */}
+      <div className="rounded-2xl border border-[#E8E4DE] bg-white overflow-hidden shadow-sm mb-5">
+        {/* Total + avg */}
+        <div className="px-5 pt-4 pb-3 flex items-start justify-between">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground mb-0.5">
+              Total trip spend
+            </p>
+            <p className="font-display text-4xl text-foreground leading-none">
+              {sym}{totalSpend.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+            {members.length > 0 && totalSpend > 0 && (
+              <p className="text-xs text-muted-foreground mt-1">
+                {sym}{perPersonAvg.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} avg per person
+              </p>
+            )}
+          </div>
+          <div className="text-right">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground mb-0.5">
+              Members
+            </p>
+            <p className="text-2xl font-semibold text-foreground">{members.length}</p>
+          </div>
+        </div>
+
+        {/* Budget progress bar */}
+        {budgetCeiling && (
+          <div className="px-5 pb-4">
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-[11px] text-muted-foreground">
+                Budget: {sym}{budgetMin?.toLocaleString()}–{sym}{budgetMax?.toLocaleString()} pp
+              </p>
+              <p className="text-[11px] text-muted-foreground">
+                {sym}{budgetCeiling.toLocaleString()} max total
+              </p>
+            </div>
+            <div className="h-1.5 w-full rounded-full bg-[#F0ECE6] overflow-hidden">
+              <div
+                className={cn(
+                  "h-full rounded-full transition-all duration-700",
+                  (budgetProgress ?? 0) >= 90 ? "bg-red-400" :
+                  (budgetProgress ?? 0) >= 70 ? "bg-amber-400" : "bg-emerald-400"
+                )}
+                style={{ width: `${budgetProgress}%` }}
+              />
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-1 text-right">
+              {budgetProgress?.toFixed(0)}% of max budget used
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* ── Your snapshot (only for identified members) ──────────────────── */}
+      {currentMemberId && expenses.length > 0 && (
+        <div className="rounded-2xl border border-violet-200/70 bg-gradient-to-br from-violet-50 via-indigo-50 to-purple-50 px-5 py-4 mb-5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-violet-600 mb-3">
+            Your snapshot
+          </p>
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <p className="text-[11px] text-muted-foreground mb-0.5">You paid</p>
+              <p className="text-lg font-semibold text-foreground">
+                {sym}{myPaid.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
+            </div>
+            <div>
+              <p className="text-[11px] text-muted-foreground mb-0.5">You&apos;re owed</p>
+              <p className={cn("text-lg font-semibold", myToReceive > 0 ? "text-emerald-600" : "text-foreground")}>
+                {sym}{myToReceive.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
+            </div>
+            <div>
+              <p className="text-[11px] text-muted-foreground mb-0.5">You owe</p>
+              <p className={cn("text-lg font-semibold", myOwed > 0 ? "text-red-500" : "text-foreground")}>
+                {sym}{myOwed.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </p>
+            </div>
+          </div>
+          {/* Net line */}
+          {(myToReceive > 0 || myOwed > 0) && (
+            <p className={cn(
+              "text-xs font-medium mt-3 pt-3 border-t",
+              myToReceive >= myOwed ? "text-emerald-600 border-emerald-100" : "text-red-500 border-red-100"
+            )}>
+              {myToReceive >= myOwed
+                ? `Net: you're up ${sym}${(myToReceive - myOwed).toFixed(2)}`
+                : `Net: you owe ${sym}${(myOwed - myToReceive).toFixed(2)} overall`}
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Tab header + Add button (desktop: side-by-side; mobile: tabs only) */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex w-fit bg-[#F0ECE6] rounded-full p-1 gap-0.5">
@@ -288,6 +406,47 @@ export default function ExpenseSection({
               );
             })
           )}
+          {/* ── Member spending breakdown ─────────────────────────────── */}
+          {expenses.length > 0 && (
+            <div className="mt-2 rounded-xl border border-[#E8E4DE] bg-white overflow-hidden shadow-sm">
+              <div className="px-4 py-3 border-b border-[#F0ECE6]">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  Paid by member
+                </p>
+              </div>
+              <div className="divide-y divide-[#F4F1EC]">
+                {members
+                  .map((m) => ({ member: m, paid: paidByMember[m.id] ?? 0 }))
+                  .sort((a, b) => b.paid - a.paid)
+                  .map(({ member, paid }) => {
+                    const isMe = member.id === currentMemberId;
+                    const pct  = totalSpend > 0 ? (paid / totalSpend) * 100 : 0;
+                    return (
+                      <div key={member.id} className="px-4 py-3">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-base leading-none">{member.emoji}</span>
+                            <span className={cn("text-sm font-medium", isMe && "text-[var(--vibe-accent,#1C2B4A)]")}>
+                              {member.name}{isMe && <span className="ml-1.5 text-[10px] text-muted-foreground font-normal">(you)</span>}
+                            </span>
+                          </div>
+                          <span className="text-sm font-semibold text-foreground">
+                            {sym}{paid.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </span>
+                        </div>
+                        <div className="h-1 w-full rounded-full bg-[#F0ECE6] overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-[var(--vibe-accent,#1C2B4A)] transition-all duration-700"
+                            style={{ width: `${pct}%`, opacity: paid > 0 ? 1 : 0 }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+          )}
+
           {/* Mobile: Add expense button at the bottom of the list */}
           <Button
             onClick={openDialog}

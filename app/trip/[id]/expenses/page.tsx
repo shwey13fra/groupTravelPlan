@@ -12,7 +12,7 @@ export default async function ExpensesPage({
   const supabase = await createClient();
 
   const [tripRes, membersRes, expensesRes, currentMemberId] = await Promise.all([
-    supabase.from("trips").select("currency").eq("id", params.id).maybeSingle(),
+    supabase.from("trips").select("currency, budget_min, budget_max, group_size").eq("id", params.id).maybeSingle(),
     supabase.from("trip_members").select("*").eq("trip_id", params.id).order("created_at", { ascending: true }),
     supabase.from("expenses").select("*").eq("trip_id", params.id).order("created_at", { ascending: false }),
     getCurrentMemberId(params.id),
@@ -20,9 +20,12 @@ export default async function ExpensesPage({
 
   if (!tripRes.data) notFound();
 
-  const members  = membersRes.data  ?? [];
-  const expenses = (expensesRes.data ?? []) as Expense[];
-  const currency = tripRes.data.currency ?? "USD";
+  const members    = membersRes.data  ?? [];
+  const expenses   = (expensesRes.data ?? []) as Expense[];
+  const currency   = tripRes.data.currency   ?? "USD";
+  const budgetMin  = tripRes.data.budget_min  ?? null;
+  const budgetMax  = tripRes.data.budget_max  ?? null;
+  const groupSize  = tripRes.data.group_size  ?? members.length;
 
   // Fetch all splits for these expenses in one query
   let splits: ExpenseSplit[] = [];
@@ -39,6 +42,9 @@ export default async function ExpensesPage({
     <ExpenseSection
       tripId={params.id}
       currency={currency}
+      budgetMin={budgetMin}
+      budgetMax={budgetMax}
+      groupSize={groupSize}
       currentMemberId={currentMemberId}
       members={members}
       initialExpenses={expenses}
