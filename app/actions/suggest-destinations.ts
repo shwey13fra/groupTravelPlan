@@ -43,7 +43,6 @@ export async function suggestDestinations(
     `Budget per person: ${trip.currency ?? "USD"} ${trip.budget_min ?? "?"} – ${trip.budget_max ?? "?"}`,
   ].join(", ");
 
-  // Call Claude — prefill "[" forces the array to start immediately
   let rawText: string;
   try {
     const msg = await anthropic.messages.create({
@@ -51,14 +50,13 @@ export async function suggestDestinations(
       max_tokens: 1024,
       system:
         'You are a travel planning assistant. Respond with a JSON array only — no markdown, no commentary. ' +
+        'Start your response with [ and end with ]. ' +
         'Schema: an array of exactly 3 objects, each with "name" (string) and "reason" (string, max 20 words).',
       messages: [
-        { role: "user",      content: userPrompt },
-        { role: "assistant", content: "[" },
+        { role: "user", content: userPrompt },
       ],
     });
-    const continuation = msg.content[0].type === "text" ? msg.content[0].text.trim() : "";
-    rawText = "[" + continuation;
+    rawText = msg.content[0].type === "text" ? msg.content[0].text.trim() : "";
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     return { error: `AI error: ${msg}` };
